@@ -1,0 +1,713 @@
+{% extends 'base.html' %} {% block title %} planning {% endblock %} {% block
+content %}
+
+<div class="container">
+  <div class="sidebar active">
+    <div class="menu-btn">
+      <i class="ph ph-caret-left"></i>
+    </div>
+    <div class="head">
+      <div class="logo">
+        <a href="{{ url_for('index') }}"
+          ><img src="../static/images/dd_logo.png" alt=""
+        /></a>
+      </div>
+    </div>
+    <div class="menu">
+      <p class="title">Model</p>
+      <ul>
+        <li>
+          <a href="#" onclick="triggerNSWPlanning()">
+            <i class="icon ph ph-strategy"></i>
+            <span class="text">GENERATE</span>
+          </a>
+        </li>
+        <p class="title">CONTROLS</p>
+        <li>
+          <a href="#">
+            <i class="icon ph ph-toggle-right"></i>
+            <span class="text">CONTROLS</span>
+            <i class="arrow ph-bold ph-caret-down"></i>
+          </a>
+          <ul class="sub-menu">
+            <li data-layer-id="admin-raster-layer">
+              <a href="#">
+                <span class="text">SUBURBS</span>
+              </a>
+            </li>
+            <li data-layer-id="cadastre-raster-layer">
+              <a href="#">
+                <span class="text">CADASTRE</span>
+              </a>
+            </li>
+            <li data-layer-id="land-zoning-raster-layer">
+              <a href="#">
+                <span class="text">ZONING</span>
+              </a>
+            </li>
+            <li data-layer-id="floor-space-ratio-raster-layer">
+              <a href="#">
+                <span class="text">FSR</span>
+              </a>
+            </li>
+            <li data-layer-id="mls-raster-layer">
+              <a href="#">
+                <span class="text">LOT SIZE</span>
+              </a>
+            </li>
+            <li data-layer-id="hob-raster-layer">
+              <a href="#">
+                <span class="text">BUILDING HEIGHT</span>
+              </a>
+            </li>
+            <li data-layer-id="building-layer">
+              <a href="#">
+                <span class="text">3D BUILDINGS</span>
+              </a>
+            </li>
+            <li data-layer-id="bushfire-raster-layer">
+              <a href="#">
+                <span class="text">BUSHFIRE</span>
+              </a>
+            </li>
+            <li data-layer-id="heritage-raster-layer">
+              <a href="#">
+                <span class="text">HERITAGE</span>
+              </a>
+            </li>
+            <li data-layer-id="Territories" data-layer-id="Territories-labels">
+              <a href="#">
+                <span class="text">NATIVE LAND</span>
+              </a>
+            </li>
+            <li data-layer-id="mapbox-satellite-layer">
+              <a href="#">
+                <span class="text">SATELLITE</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div class="menu">
+      <p class="title">GIRAFFE</p>
+      <ul>
+        <li id="giraffe">
+          <a href="#">
+            <i class="icon ph ph-city"></i>
+            <span class="text">GIRAFFE</span>
+          </a>
+        </li>
+        <input
+          type="file"
+          id="giraffeInput"
+          name="giraffeInput"
+          style="display: none"
+        />
+        <!-- <li>
+          <a href="#" onclick="triggerSpeckle()">
+            <i class="icon ph ph-cube"></i>
+            <span class="text">SPECKLE</span>
+          </a>
+        </li> -->
+        <!-- <li>
+          <a href="#">
+            <i class="icon ph ph-wrench"></i>
+            <span class="text">TOOLS</span>
+          </a>
+        </li> -->
+      </ul>
+    </div>
+    <div class="menu">
+      <p class="title">Support</p>
+      <ul>
+        <li>
+          <a href="#" id="help-icon">
+            <i class="icon ph ph-info"></i>
+            <span class="text">HELP</span>
+          </a>
+        </li>
+        <p class="title">States</p>
+        <li class="last-menu-item">
+          <a href="#">
+            <i class="icon ph ph-globe-hemisphere-east"></i>
+            <span class="text">STATES</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="head">
+      <div class="logo">
+        <a href="https://www.nettletontribe.com.au/"
+          ><img src="../static/images/nt_logo.png" alt=""
+        /></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  mapboxgl.accessToken =
+    "pk.eyJ1Ijoicml2aW5kdWIiLCJhIjoiY2xmYThkcXNjMHRkdDQzcGU4Mmh2a3Q3MSJ9.dXlhamKyYyGusL3PWqDD9Q";
+  var lat = "{{ lat }}";
+  var lon = "{{ lon }}";
+
+  const map = new mapboxgl.Map({
+    container: "map",
+    center: [lon, lat],
+    zoom: 10,
+    config: {
+      basemap: {
+        show3dObjects: false,
+      },
+    },
+  });
+
+  function toggle3DBuildings() {
+    const currentState = map.getConfigProperty("basemap", "show3dObjects");
+    const newState = !currentState;
+
+    map.setConfigProperty("basemap", "show3dObjects", newState);
+  }
+
+  document
+    .querySelector('li[data-layer-id="building-layer"]')
+    .addEventListener("click", function () {
+      toggle3DBuildings();
+    });
+
+  map.on("style.load", () => {
+    map.setConfigProperty("basemap", "lightPreset", "night");
+    map.setConfigProperty("basemap", "showPointOfInterestLabels", false);
+    map.setConfigProperty("basemap", "showPlaceLabels", false);
+    map.setConfigProperty("basemap", "showTransitLabels", false);
+  });
+
+  var layerMapping = {
+    Territories: "Territories-labels",
+  };
+
+  map.on("load", function () {
+    map.addSource("cadastre-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://maps.six.nsw.gov.au/arcgis/rest/services/sixmaps/Cadastre/MapServer/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image&layers=show:0",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "cadastre-raster-layer",
+      slot: "middle",
+      type: "raster",
+      source: "cadastre-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("mapbox-satellite", {
+      type: "raster",
+      url: "mapbox://mapbox.satellite",
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "mapbox-satellite-layer",
+      type: "raster",
+      slot: "middle",
+      source: "mapbox-satellite",
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("land-zoning-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://mapprod1.environment.nsw.gov.au/arcgis/rest/services/Planning/EPI_Primary_Planning_Layers/MapServer//export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A2&bbox={bbox-epsg-3857}",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "land-zoning-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "land-zoning-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("floor-space-ratio-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/Principal_Planning_Layers/MapServer/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image&layers=show:4",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "floor-space-ratio-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "floor-space-ratio-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("mls-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/Principal_Planning_Layers/MapServer/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image&layers=show:14",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "mls-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "mls-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("heritage-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/Principal_Planning_Layers/MapServer/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image&layers=show:8",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "heritage-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "heritage-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("hob-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/Principal_Planning_Layers/MapServer/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image&layers=show:7",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "hob-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "hob-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("bushfire-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/ePlanning/Planning_Portal_Hazard/MapServer//export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A229&bbox={bbox-epsg-3857}",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "bushfire-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "bushfire-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("admin-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Administrative_Boundaries/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A0&bbox={bbox-epsg-3857}",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "admin-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "admin-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("nativelands-source", {
+      type: "vector",
+      url: "mapbox://nativeland.cjh3mywgg04aaahpidhgio50e-9ctzy",
+    });
+
+    map.addLayer({
+      id: "Territories",
+      type: "fill",
+      slot: "middle",
+      source: "nativelands-source",
+      "source-layer": "Territories",
+      paint: {
+        "fill-color": ["get", "color"],
+        "fill-opacity": 1,
+        "fill-emissive-strength": 1,
+      },
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+    });
+
+    map.addLayer({
+      id: "Territories-labels",
+      type: "symbol",
+      source: "nativelands-source",
+      "source-layer": "Territories",
+      layout: {
+        "text-field": ["to-string", ["get", "Name"]],
+        "text-font": ["Open Sans ExtraBold", "Arial Unicode MS Regular"],
+        "text-size": 15,
+        visibility: "none",
+      },
+      paint: {
+        "text-color": "#ffffff",
+        "text-emissive-strength": 1,
+      },
+      minzoom: 0,
+      maxzoom: 22,
+    });
+  });
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl: mapboxgl,
+    marker: true,
+  });
+
+  map.addControl(geocoder, "top-right");
+
+  var marker;
+  function mapClickFn(coordinates, addressFieldId) {
+    const url =
+      "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+      coordinates.lng +
+      "," +
+      coordinates.lat +
+      ".json?access_token=" +
+      mapboxgl.accessToken +
+      "&types=address";
+
+    $.get(url, function (data) {
+      if (data.features.length > 0) {
+        const address = data.features[0].place_name;
+        $("#" + addressFieldId).val(address);
+      }
+    });
+  }
+
+  map.on("click", function (e) {
+    if (marker) {
+      marker.remove();
+    }
+
+    marker = new mapboxgl.Marker({
+      color: "#FFD700",
+      circleRadius: 8,
+      draggable: false,
+    })
+      .setLngLat(e.lngLat)
+      .addTo(map);
+
+    mapClickFn(e.lngLat, "address-box");
+
+    // Query APIs and show info box
+    const zoningUrl = `https://mapprod1.environment.nsw.gov.au/arcgis/rest/services/Planning/EPI_Primary_Planning_Layers/MapServer/2/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=LAY_CLASS,SYM_CODE&f=json`;
+    const fsrUrl = `https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/Principal_Planning_Layers/MapServer/4/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=FSR&f=json`;
+    const hobUrl = `https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/Principal_Planning_Layers/MapServer/7/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=MAX_B_H&f=json`;
+    const lotsizeUrl = `https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/EPI_Primary_Planning_Layers/MapServer/4/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=LOT_SIZE&f=json`;
+    const lotsUrl = `https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Cadastre/MapServer/9/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=shape_Area,itslotid,planlabel&f=json`;
+
+    // Create and show initial info box structure
+    const infoBoxContainer =
+      document.getElementById("fixed-info-container") ||
+      document.createElement("div");
+    infoBoxContainer.id = "fixed-info-container";
+    document.body.appendChild(infoBoxContainer);
+
+    // Initial content structure
+    let infoContent = `
+      <div class="fixed-info-box">
+        <h3>Site Information</h3>
+        
+        <div class="info-section" id="zoning-section">
+          <h4>Zoning Controls</h4>
+          <p><em>Loading zoning data...</em></p>
+        </div>
+        
+        <div class="info-section" id="development-section">
+          <h4>Development Controls</h4>
+          <p><em>Loading development controls...</em></p>
+        </div>
+        
+        <div class="info-section" id="location-section">
+          <h4>Location</h4>
+          <p><strong>Latitude:</strong> ${e.lngLat.lat.toFixed(6)}</p>
+          <p><strong>Longitude:</strong> ${e.lngLat.lng.toFixed(6)}</p>
+        </div>
+      </div>
+    `;
+
+    infoBoxContainer.innerHTML = infoContent;
+
+    // Function to update sections as data arrives
+    const updateSection = (sectionId, content) => {
+      const section = document.querySelector(`#${sectionId}`);
+      if (section) {
+        section.innerHTML = `<h4>${
+          section.querySelector("h4").textContent
+        }</h4>${content}`;
+      }
+    };
+
+    // Fetch and update zoning data
+    fetch(zoningUrl)
+      .then((response) => response.json())
+      .then((zoningData) => {
+        let content = "";
+        if (zoningData.features && zoningData.features.length > 0) {
+          content += `<p><strong>Zone:</strong> ${zoningData.features[0].attributes.LAY_CLASS}</p>`;
+          content += `<p><strong>Zone Code:</strong> ${zoningData.features[0].attributes.SYM_CODE}</p>`;
+        } else {
+          content += "<p><em>No zoning data available</em></p>";
+        }
+        updateSection("zoning-section", content);
+      })
+      .catch(() =>
+        updateSection(
+          "zoning-section",
+          "<p><em>Error loading zoning data</em></p>"
+        )
+      );
+
+    // Fetch and update development controls
+    const updateDevelopmentSection = () => {
+      let content = "";
+      let loadedData = {
+        fsr: null,
+        hob: null,
+        lotsize: null,
+        lots: null,
+      };
+
+      const updateContent = () => {
+        content = "";
+        if (loadedData.fsr) {
+          content += `<p><strong>Floor Space Ratio:</strong> ${loadedData.fsr}:1</p>`;
+        }
+        if (loadedData.hob) {
+          content += `<p><strong>Height of Building:</strong> ${loadedData.hob}m</p>`;
+        }
+        if (loadedData.lotsize) {
+          content += `<p><strong>Minimum Lot Size:</strong> ${loadedData.lotsize}m²</p>`;
+        }
+        if (loadedData.lots) {
+          content += `<p><strong>Lot Area:</strong> ${loadedData.lots.area}m²</p>`;
+          content += `<p><strong>Lot ID:</strong> ${loadedData.lots.id}</p>`;
+          content += `<p><strong>Title:</strong> ${loadedData.lots.label}</p>`;
+        }
+        updateSection(
+          "development-section",
+          content || "<p><em>No development controls available</em></p>"
+        );
+      };
+
+      // FSR
+      fetch(fsrUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.features && data.features.length > 0) {
+            loadedData.fsr = data.features[0].attributes.FSR;
+          }
+          updateContent();
+        });
+
+      // HOB
+      fetch(hobUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.features && data.features.length > 0) {
+            loadedData.hob = data.features[0].attributes.MAX_B_H;
+          }
+          updateContent();
+        });
+
+      // Lot Size
+      fetch(lotsizeUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.features && data.features.length > 0) {
+            loadedData.lotsize = data.features[0].attributes.LOT_SIZE;
+          }
+          updateContent();
+        });
+
+      // Lots
+      fetch(lotsUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.features && data.features.length > 0) {
+            loadedData.lots = {
+              area: Number(data.features[0].attributes.shape_Area).toFixed(2),
+              id: data.features[0].attributes.itslotid,
+              label: data.features[0].attributes.planlabel,
+            };
+          }
+          updateContent();
+        });
+    };
+
+    updateDevelopmentSection();
+  });
+
+  var nav = new mapboxgl.NavigationControl({
+    showCompass: true,
+    showZoom: true,
+  });
+
+  map.addControl(nav, "top-right");
+</script>
+
+<script>
+  function triggerNSWPlanning() {
+    var address = document.getElementById("address-box").value;
+    hideErrorMessage();
+
+    if (!address.trim()) {
+      showErrorMessage("Please drop a marker on a site before proceeding.");
+      return;
+    }
+
+    displaySpinner();
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          var contentType = xhr.getResponseHeader("Content-Type");
+          if (contentType === "application/json") {
+            // This is an error response
+            var response = JSON.parse(xhr.responseText);
+            showErrorMessage(response.error);
+          } else {
+            // This is a file response
+            var blob = new Blob([xhr.response], {
+              type: "application/octet-stream",
+            });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "planning.3dm";
+            a.click();
+          }
+        } else {
+          console.error("Error:", xhr.status, xhr.statusText);
+          showErrorMessage("Error: " + xhr.statusText);
+        }
+        hideSpinner();
+      }
+    };
+    xhr.open(
+      "GET",
+      "{{ url_for('nsw_planning') }}?address=" + encodeURIComponent(address),
+      true
+    );
+    xhr.responseType = "blob";
+    xhr.send();
+  }
+
+  function triggerSpeckle() {
+    var address = document.getElementById("address-box").value;
+    hideErrorMessage();
+
+    if (!address.trim()) {
+      showErrorMessage("Please drop a marker on a site before proceeding.");
+      return;
+    }
+
+    displaySpinner();
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          hideSpinner();
+        } else {
+          console.error("Error:", xhr.status, xhr.statusText);
+          showErrorMessage("Error: " + xhr.statusText);
+          hideSpinner();
+        }
+      }
+    };
+    xhr.open(
+      "GET",
+      "{{ url_for('speckleSend') }}?address=" + encodeURIComponent(address),
+      true
+    );
+    xhr.send();
+  }
+</script>
+{% endblock %}
