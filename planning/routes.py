@@ -157,8 +157,6 @@ def nsw_planning():
         planning_model, "BUILDINGS", (99, 99, 99, 255), geometry_layerIndex)
     contours_layerIndex = rhinoutils.create_layer(
         planning_model, "CONTOURS", (191, 191, 191, 255), geometry_layerIndex)
-    buildingfootprint_LayerIndex = rhinoutils.create_layer(
-        planning_model, "BUILDING FOOTPRINT", (191, 191, 191, 255), geometry_layerIndex)
     boundary_layerEIndex = rhinoutils.create_layer(
         planning_model, "BOUNDARY ELEVATED", (237, 0, 194, 255), elevated_layerIndex)
     building_layer_EIndex = rhinoutils.create_layer(
@@ -204,7 +202,6 @@ def nsw_planning():
                         if "features" in data and data["features"]:
                             all_features.extend(data["features"])
                         else:
-                            print(f"No features in the current page: {url}")
                             break
 
                         # Check for the next page (example with a 'next' key)
@@ -215,13 +212,10 @@ def nsw_planning():
                         # Update the URL or parameters for the next page
                         url = next_page_url
                     else:
-                        print(f"Non-200 response: {response.status}")
                         break
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                print(f"Error during pagination: {e}")
                 break
             except Exception as e:
-                print(f"Unexpected error during pagination: {e}")
                 break
 
         return {"features": all_features}
@@ -250,18 +244,15 @@ def nsw_planning():
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
                 print(f"Network error: {e}, attempt {attempt + 1} for {url}")
             except Exception as e:
-                print(f"Unexpected error: {e}, attempt {
-                      attempt + 1} for {url}")
+                print(f"Unexpected error: {e}, attempt {attempt + 1} for {url}")
 
             # Increment retry count and apply exponential backoff
             attempt += 1
             backoff_time = INITIAL_BACKOFF * \
                 (2 ** (attempt - 1)) + imports.random.uniform(0, 1)
-            print(f"Retrying in {backoff_time:.2f} seconds...")
             await asyncio.sleep(backoff_time)
 
         # If all retries fail
-        print(f"Failed to fetch data from {url} after {retries} attempts.")
         return None
 
     async def fetch_all_data_with_validation(urls_dict):
@@ -307,9 +298,6 @@ def nsw_planning():
     data_dict = loop.run_until_complete(
         fetch_all_data_with_validation(params_dict))
 
-    # Print or process the results
-    for key, value in data_dict.items():
-        print(f"{key}: {len(value.get('features', []))} features")
 
     admin_data = data_dict.get('admin_data')
     zoning_data = data_dict.get('zoning_data')
@@ -406,8 +394,7 @@ def nsw_planning():
     #                       raster_layerIndex, planning_model, transformer=globals.transformer2)
 
     # buildings
-    mapboxfetcher.mapbox_buildings(tiles, zoom,
-                                   buildingfootprint_LayerIndex, building_layerIndex, planning_model, transformer=globals.transformer2)
+    mapboxfetcher.mapbox_buildings(tiles, zoom, building_layerIndex, planning_model, transformer=globals.transformer2)
 
     # topography
     rhinoutils.add_contours(
@@ -566,8 +553,6 @@ def qld_planning():
         qld_planning, "BUILDINGS", (99, 99, 99, 255), geometry_layerIndex)
     contours_layerIndex = rhinoutils.create_layer(
         qld_planning, "CONTOURS", (191, 191, 191, 255), geometry_layerIndex)
-    buildingfootprint_LayerIndex = rhinoutils.create_layer(
-        qld_planning, "BUILDING FOOTPRINT", (191, 191, 191, 255), geometry_layerIndex)
     boundary_layerEIndex = rhinoutils.create_layer(
         qld_planning, "BOUNDARY ELEVATED", (237, 0, 194, 255), elevated_layerIndex)
     building_layer_EIndex = rhinoutils.create_layer(
@@ -724,8 +709,7 @@ def qld_planning():
     #                       raster_layerIndex, qld_planning, transformer=globals.transformer2)
 
     # buildings
-    mapboxfetcher.mapbox_buildings(tiles, zoom,
-                                   buildingfootprint_LayerIndex, building_layerIndex, qld_planning, transformer=globals.transformer2)
+    mapboxfetcher.mapbox_buildings(tiles, zoom, building_layerIndex, qld_planning, transformer=globals.transformer2)
 
     # topography
     rhinoutils.add_contours(
@@ -864,8 +848,6 @@ def vic_planning():
         vic_planning, "BUILDINGS", (99, 99, 99, 255), geometry_layerIndex)
     contours_layerIndex = rhinoutils.create_layer(
         vic_planning, "CONTOURS", (191, 191, 191, 255), geometry_layerIndex)
-    buildingfootprint_LayerIndex = rhinoutils.create_layer(
-        vic_planning, "BUILDING FOOTPRINT", (191, 191, 191, 255), geometry_layerIndex)
     boundary_layerEIndex = rhinoutils.create_layer(
         vic_planning, "BOUNDARY ELEVATED", (237, 0, 194, 255), elevated_layerIndex)
     building_layer_EIndex = rhinoutils.create_layer(
@@ -1014,8 +996,7 @@ def vic_planning():
     #                       raster_layerIndex, vic_planning, transformer=globals.transformer2_vic)
 
     # buildings
-    mapboxfetcher.mapbox_buildings(tiles, zoom,
-                                   buildingfootprint_LayerIndex, building_layerIndex, vic_planning, transformer=globals.transformer2_vic)
+    mapboxfetcher.mapbox_buildings(tiles, zoom, building_layerIndex, vic_planning, transformer=globals.transformer2_vic)
 
     # topography
     rhinoutils.add_contours(
@@ -1167,8 +1148,6 @@ def tas_planning():
         tas_planning, "BUILDINGS", (99, 99, 99, 255), geometry_layerIndex)
     contours_layerIndex = rhinoutils.create_layer(
         tas_planning, "CONTOURS", (191, 191, 191, 255), geometry_layerIndex)
-    buildingfootprint_LayerIndex = rhinoutils.create_layer(
-        tas_planning, "BUILDING FOOTPRINT", (191, 191, 191, 255), geometry_layerIndex)
     boundary_layerEIndex = rhinoutils.create_layer(
         tas_planning, "BOUNDARY ELEVATED", (237, 0, 194, 255), elevated_layerIndex)
     building_layer_EIndex = rhinoutils.create_layer(
@@ -1306,8 +1285,7 @@ def tas_planning():
     #                       raster_layerIndex, tas_planning, transformer=globals.transformer2_vic)
 
     # buildings
-    mapboxfetcher.mapbox_buildings(tiles, zoom,
-                                   buildingfootprint_LayerIndex, building_layerIndex, tas_planning, transformer=globals.transformer2_vic)
+    mapboxfetcher.mapbox_buildings(tiles, zoom, building_layerIndex, tas_planning, transformer=globals.transformer2_vic)
 
     # topography
     rhinoutils.add_contours(
@@ -1448,8 +1426,6 @@ def act_planning():
         act_planning, "BUILDINGS", (99, 99, 99, 255), geometry_layerIndex)
     contours_layerIndex = rhinoutils.create_layer(
         act_planning, "CONTOURS", (191, 191, 191, 255), geometry_layerIndex)
-    buildingfootprint_LayerIndex = rhinoutils.create_layer(
-        act_planning, "BUILDING FOOTPRINT", (191, 191, 191, 255), geometry_layerIndex)
     boundary_layerEIndex = rhinoutils.create_layer(
         act_planning, "BOUNDARY ELEVATED", (237, 0, 194, 255), elevated_layerIndex)
     building_layer_EIndex = rhinoutils.create_layer(
@@ -1587,8 +1563,7 @@ def act_planning():
     #                       raster_layerIndex, act_planning, transformer=globals.transformer2)
 
     # buildings
-    mapboxfetcher.mapbox_buildings(tiles, zoom,
-                                   buildingfootprint_LayerIndex, building_layerIndex, act_planning, transformer=globals.transformer2)
+    mapboxfetcher.mapbox_buildings(tiles, zoom, building_layerIndex, act_planning, transformer=globals.transformer2)
 
     # topography
     rhinoutils.add_contours(
@@ -1673,8 +1648,6 @@ def speckleSend():
         speckle_model, "CONTOURS", (191, 191, 191, 255))
     topography_layerIndex = rhinoutils.create_layer(
         speckle_model, "TOPOGRAPHY", (191, 191, 191, 255))
-    buildingfootprint_LayerIndex = rhinoutils.create_layer(
-        speckle_model, "BUILDING FOOTPRINT", (191, 191, 191, 255))
     contours_layer_EIndex = rhinoutils.create_layer(
         speckle_model, "CONTOURS ELEVATED", (191, 191, 191, 255))
     building_layer_EIndex = rhinoutils.create_layer(
@@ -1722,8 +1695,7 @@ def speckleSend():
         boundary_data, boundary_layerIndex, address, speckle_model)
 
     # buildings
-    mapboxfetcher.mapbox_buildings(tiles, zoom,
-                                   buildingfootprint_LayerIndex, building_layerIndex, speckle_model, transformer=globals.transformer2)
+    mapboxfetcher.mapbox_buildings(tiles, zoom, building_layerIndex, speckle_model, transformer=globals.transformer2)
 
     # contours
     rhinoutils.add_contours(

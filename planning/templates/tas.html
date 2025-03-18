@@ -315,7 +315,7 @@ content %}
   const geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
     mapboxgl: mapboxgl,
-    marker: true,
+    marker: false,
   });
 
   map.addControl(geocoder, "top-right");

@@ -99,7 +99,7 @@ class MapboxFetcher:
         return result
 
     @staticmethod
-    def mapbox_buildings(tiles, zoom, buildingfootprint_LayerIndex, building_layerIndex, model, transformer):
+    def mapbox_buildings(tiles, zoom, building_layerIndex, model, transformer):
         def process_geometry(geometry, height):
             for ring in geometry:
                 points = []
@@ -120,9 +120,6 @@ class MapboxFetcher:
                 orientation = curve.ClosedCurveOrientation()
                 if orientation == imports.rh.CurveOrientation.Clockwise:
                     curve.Reverse()
-                att_bf = imports.rh.ObjectAttributes()
-                att_bf.LayerIndex = buildingfootprint_LayerIndex
-                model.Objects.AddCurve(curve, att_bf)
                 extrusion = imports.rh.Extrusion.Create(curve, height, True)
                 att = imports.rh.ObjectAttributes()
                 att.LayerIndex = building_layerIndex

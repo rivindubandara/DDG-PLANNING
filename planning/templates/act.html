@@ -356,7 +356,7 @@ content %}
   const geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
     mapboxgl: mapboxgl,
-    marker: true,
+    marker: false,
   });
 
   map.addControl(geocoder, "top-right");
@@ -398,7 +398,6 @@ content %}
     // Query APIs and show info box
     const lotsUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer/66/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
     const heritageUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/heritage/MapServer/3/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-
 
     // Create and show initial info box structure
     const infoBoxContainer =
