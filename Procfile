@@ -1,1 +1,1 @@
-web: gunicorn -c gunicorn_config.py planning:application
+web: gunicorn planning:application
