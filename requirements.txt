@@ -132,7 +132,7 @@ graphql-core==3.2.3
 greenlet==2.0.2
 grpcio==1.54.0
 grpcio-status==1.48.2
-gunicorn==20.1.0
+gunicorn==21.2.0
 h11==0.14.0
 halo==0.0.31
 hnswlib==0.7.0
