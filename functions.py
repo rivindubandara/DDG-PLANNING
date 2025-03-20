@@ -74,8 +74,7 @@ class ComputeAPI:
 class MapboxFetcher:
     @staticmethod
     def fetch_mapbox_data(zoom, tile):
-        mb_url = f"https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{zoom}/{
-            tile.x}/{tile.y}.mvt?access_token={mapbox_access_token}"
+        mb_url = f"https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{zoom}/{ tile.x}/{tile.y}.mvt?access_token={mapbox_access_token}"
         counter = 0
         while True:
             try:
@@ -717,8 +716,7 @@ class RhinoUtils:
     @staticmethod
     def add_raster(ras_tiles, zoom, algo, layerIndex, model, transformer):
         for tile in ras_tiles:
-            mb_url = f"https://api.mapbox.com/v4/mapbox.satellite/{zoom}/{tile.x}/{
-                tile.y}@2x.png256?access_token={mapbox_access_token}"
+            mb_url = f"https://api.mapbox.com/v4/mapbox.satellite/{zoom}/{tile.x}/{tile.y}@2x.png256?access_token={mapbox_access_token}"
             response = imports.requests.get(mb_url)
 
             if response.status_code == 200:
