@@ -1,0 +1,573 @@
+{% extends 'base.html' %} {% block title %} planning {% endblock %} {% block
+content %}
+
+<div class="container">
+  <div class="sidebar active">
+    <div class="menu-btn">
+      <i class="ph ph-caret-left"></i>
+    </div>
+    <div class="head">
+      <div class="logo">
+        <a href="https://digitaldesign.nettletontribe.com.au/"
+          ><img src="../static/images/dd_logo.png" alt=""
+        /></a>
+      </div>
+    </div>
+    <div class="menu">
+      <p class="title">MODEL</p>
+      <ul>
+        <li>
+          <a href="#" onclick="triggerQLDPlanning()">
+            <i class="icon ph ph-strategy"></i>
+            <span class="text">GENERATE</span>
+          </a>
+        </li>
+        <p class="title">CONTROLS</p>
+        <li>
+          <a href="#">
+            <i class="icon ph ph-toggle-right"></i>
+            <span class="text">CONTROLS</span>
+            <i class="arrow ph-bold ph-caret-down"></i>
+          </a>
+          <ul class="sub-menu">
+            <li data-layer-id="admin-raster-layer">
+              <a href="#">
+                <span class="text">SUBURBS</span>
+              </a>
+            </li>
+            <li data-layer-id="cadastre-raster-layer">
+              <a href="#">
+                <span class="text">CADASTRE</span>
+              </a>
+            </li>
+            <li data-layer-id="land-zoning-raster-layer">
+              <a href="#">
+                <span class="text">ZONING</span>
+              </a>
+            </li>
+            <li data-layer-id="building-layer">
+              <a href="#">
+                <span class="text">3D BUILDINGS</span>
+              </a>
+            </li>
+            <li data-layer-id="bushfire-raster-layer">
+              <a href="#">
+                <span class="text">BUSHFIRE</span>
+              </a>
+            </li>
+            <li data-layer-id="heritage-raster-layer">
+              <a href="#">
+                <span class="text">HERITAGE</span>
+              </a>
+            </li>
+            <li data-layer-id="Territories">
+              <a href="#">
+                <span class="text">NATIVE LAND</span>
+              </a>
+            </li>
+            <li data-layer-id="mapbox-satellite-layer">
+              <a href="#">
+                <span class="text">SATELLITE</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div class="menu">
+      <p class="title">GIRAFFE</p>
+      <ul>
+        <li id="giraffe">
+          <a href="#">
+            <i class="icon ph ph-city"></i>
+            <span class="text">GIRAFFE</span>
+          </a>
+        </li>
+        <input
+          type="file"
+          id="giraffeInput"
+          name="giraffeInput"
+          style="display: none"
+        />
+        <!-- <li>
+          <a href="#">
+            <i class="icon ph ph-wrench"></i>
+            <span class="text">TOOLS</span>
+          </a>
+        </li> -->
+      </ul>
+    </div>
+    <div class="menu">
+      <p class="title">Support</p>
+      <ul>
+        <li>
+          <a href="#" id="help-icon">
+            <i class="icon ph ph-info"></i>
+            <span class="text">HELP</span>
+          </a>
+        </li>
+        <li class="last-menu-item">
+          <a href="#">
+            <i class="icon ph ph-globe-hemisphere-east"></i>
+            <span class="text">STATES</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="head">
+      <div class="logo">
+        <a href="https://www.nettletontribe.com.au/"
+          ><img src="../static/images/nt_logo.png" alt=""
+        /></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  mapboxgl.accessToken =
+    "pk.eyJ1Ijoicml2aW5kdWIiLCJhIjoiY2xmYThkcXNjMHRkdDQzcGU4Mmh2a3Q3MSJ9.dXlhamKyYyGusL3PWqDD9Q";
+  var lat = "{{ lat }}";
+  var lon = "{{ lon }}";
+
+  const map = new mapboxgl.Map({
+    container: "map",
+    center: [lon, lat],
+    zoom: 10,
+    config: {
+      basemap: {
+        show3dObjects: false,
+      },
+    },
+  });
+
+  function toggle3DBuildings() {
+    const currentState = map.getConfigProperty("basemap", "show3dObjects");
+    const newState = !currentState;
+
+    map.setConfigProperty("basemap", "show3dObjects", newState);
+  }
+
+  document
+    .querySelector('li[data-layer-id="building-layer"]')
+    .addEventListener("click", function () {
+      toggle3DBuildings();
+    });
+
+  map.on("style.load", () => {
+    map.setConfigProperty("basemap", "lightPreset", "night");
+    map.setConfigProperty("basemap", "showPointOfInterestLabels", false);
+    map.setConfigProperty("basemap", "showPlaceLabels", false);
+    map.setConfigProperty("basemap", "showTransitLabels", false);
+  });
+
+  var layerMapping = {
+    Territories: "Territories-labels",
+  };
+
+  map.on("load", function () {
+    map.addSource("cadastre-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image&layers=show:8",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "cadastre-raster-layer",
+      slot: "middle",
+      type: "raster",
+      source: "cadastre-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("mapbox-satellite", {
+      type: "raster",
+      url: "mapbox://mapbox.satellite",
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "mapbox-satellite-layer",
+      type: "raster",
+      slot: "middle",
+      source: "mapbox-satellite",
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("land-zoning-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandUse/MapServer//export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A0&bbox={bbox-epsg-3857}",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "land-zoning-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "land-zoning-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("heritage-raster-tiles", {
+      type: "vector",
+      tiles: [
+        "https://layers-node-ehcce5pxxq-ts.a.run.app/featureServer/{z}/{x}/{y}/https%3A%2F%2Fservices2.arcgis.com%2FdEKgZETqwmDAh1rP%2Farcgis%2Frest%2Fservices%2FHeritage_overlay_Area_adjoining%2FFeatureServer%2F0%2Fquery%3Fwhere%3D1%3D1%26geometry%3D%7Bbbox-epsg-3857%7D%26geometryType%3DesriGeometryEnvelope%26inSR%3D3857%26spatialRel%3DesriSpatialRelIntersects%26returnGeodetic%3Dfalse%26outFields%3D*%26returnGeometry%3Dtrue%26returnCentroid%3Dfalse%26featureEncoding%3DesriDefault%26multipatchOption%3DxyFootprint%26applyVCSProjection%3Dfalse%26returnIdsOnly%3Dfalse%26returnUniqueIdsOnly%3Dfalse%26returnCountOnly%3Dfalse%26returnExtentOnly%3Dfalse%26returnQueryGeometry%3Dfalse%26returnDistinctValues%3Dfalse%26cacheHint%3Dfalse%26returnZ%3Dfalse%26returnM%3Dfalse%26returnExceededLimitFeatures%3Dtrue%26f%3Dgeojson",
+      ],
+    });
+
+    map.addLayer({
+      id: "heritage-raster-layer",
+      slot: "middle",
+      type: "fill",
+      source: "heritage-raster-tiles",
+      "source-layer": "geojsonLayer",
+      paint: {
+        "fill-color": "#ffffff",
+        "fill-emissive-strength": 1,
+      },
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+    });
+
+    map.addSource("bushfire-raster-tiles", {
+      type: "vector",
+      tiles: [
+        "https://layers-node-ehcce5pxxq-ts.a.run.app/featureServer/{z}/{x}/{y}/https%3A%2F%2Fservices2.arcgis.com%2FdEKgZETqwmDAh1rP%2Farcgis%2Frest%2Fservices%2FBushfire_overlay%2FFeatureServer%2F0%2Fquery%3Fwhere%3D1%3D1%26geometry%3D%7Bbbox-epsg-3857%7D%26geometryType%3DesriGeometryEnvelope%26inSR%3D3857%26spatialRel%3DesriSpatialRelIntersects%26returnGeodetic%3Dfalse%26outFields%3D*%26returnGeometry%3Dtrue%26returnCentroid%3Dfalse%26featureEncoding%3DesriDefault%26multipatchOption%3DxyFootprint%26applyVCSProjection%3Dfalse%26returnIdsOnly%3Dfalse%26returnUniqueIdsOnly%3Dfalse%26returnCountOnly%3Dfalse%26returnExtentOnly%3Dfalse%26returnQueryGeometry%3Dfalse%26returnDistinctValues%3Dfalse%26cacheHint%3Dfalse%26returnZ%3Dfalse%26returnM%3Dfalse%26returnExceededLimitFeatures%3Dtrue%26f%3Dgeojson",
+      ],
+    });
+
+    map.addLayer({
+      id: "bushfire-raster-layer",
+      type: "fill",
+      slot: "middle",
+      source: "bushfire-raster-tiles",
+      "source-layer": "geojsonLayer",
+      paint: {
+        "fill-color": {
+          property: "OVL2_CAT",
+          type: "categorical",
+          stops: [
+            ["BHR_HRZ", "rgba(220, 110, 100, 255)"],
+            ["BHR_MRZ", "rgba(255, 190, 60, 255)"],
+            ["BHR_HRB", "rgba(220, 110, 100, 255)"],
+            ["BHR_MRB", "rgba(255, 190, 60, 255)"],
+            ["BHR_PI", "rgba(0, 112, 255, 255)"],
+            ["BHR_POB", "rgba(255, 0, 0, 255)"],
+            ["BHR_VHI", "rgba(168, 0, 0, 255)"],
+            ["BHR_HI", "rgba(255, 0, 0, 255)"],
+            ["BHR_MI", "rgba(255, 155, 60, 255)"],
+          ],
+          default: "rgba(0, 0, 0, 0.3)",
+        },
+        "fill-opacity": 1,
+        "fill-emissive-strength": 1,
+      },
+      layout: {
+        visibility: "none",
+      },
+    });
+
+    map.addSource("admin-raster-tiles", {
+      type: "raster",
+      tiles: [
+        "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Boundaries/AdministrativeBoundaries/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A1&bbox={bbox-epsg-3857}",
+      ],
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "admin-raster-layer",
+      type: "raster",
+      slot: "middle",
+      source: "admin-raster-tiles",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    map.addSource("nativelands-source", {
+      type: "vector",
+      url: "mapbox://nativeland.cjh3mywgg04aaahpidhgio50e-9ctzy",
+    });
+
+    map.addLayer({
+      id: "Territories",
+      type: "fill",
+      slot: "middle",
+      source: "nativelands-source",
+      "source-layer": "Territories",
+      paint: {
+        "fill-color": ["get", "color"],
+        "fill-opacity": 1,
+        "fill-emissive-strength": 1,
+      },
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+    });
+
+    map.addLayer({
+      id: "Territories-labels",
+      type: "symbol",
+      source: "nativelands-source",
+      "source-layer": "Territories",
+      layout: {
+        "text-field": ["to-string", ["get", "Name"]],
+        "text-font": ["Open Sans ExtraBold", "Arial Unicode MS Regular"],
+        "text-size": 15,
+        visibility: "none",
+      },
+      paint: {
+        "text-color": "#ffffff",
+        "text-emissive-strength": 1,
+      },
+      minzoom: 0,
+      maxzoom: 22,
+    });
+  });
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl: mapboxgl,
+    marker: false,
+  });
+
+  map.addControl(geocoder, "top-right");
+
+  var marker;
+  function mapClickFn(coordinates, addressFieldId) {
+    const url =
+      "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+      coordinates.lng +
+      "," +
+      coordinates.lat +
+      ".json?access_token=" +
+      mapboxgl.accessToken +
+      "&types=address";
+
+    $.get(url, function (data) {
+      if (data.features.length > 0) {
+        const address = data.features[0].place_name;
+        $("#" + addressFieldId).val(address);
+      }
+    });
+  }
+
+  map.on("click", function (e) {
+    if (marker) {
+      marker.remove();
+    }
+
+    marker = new mapboxgl.Marker({
+      color: "#FFD700",
+      circleRadius: 8,
+      draggable: false,
+    })
+      .setLngLat(e.lngLat)
+      .addTo(map);
+
+    mapClickFn(e.lngLat, "address-box");
+
+    // Query APIs and show info box
+    const zoningUrl = `https://spatial-gis.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandUse/MapServer/0/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+    const lotsUrl = `https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/8/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+    const bushfireUrl = `https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Bushfire_overlay/FeatureServer/0/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+
+    // Create and show initial info box structure
+    const infoBoxContainer =
+      document.getElementById("fixed-info-container") ||
+      document.createElement("div");
+    infoBoxContainer.id = "fixed-info-container";
+    document.body.appendChild(infoBoxContainer);
+
+    // Initial content structure
+    let infoContent = `
+      <div class="fixed-info-box">
+        <h3>Site Information</h3>
+        
+        <div class="info-section" id="zoning-section">
+          <h4>Zoning Controls</h4>
+          <p><em>Loading zoning data...</em></p>
+        </div>
+        
+        <div class="info-section" id="development-section">
+          <h4>Development Controls</h4>
+          <p><em>Loading development controls...</em></p>
+        </div>
+        
+        <div class="info-section" id="location-section">
+          <h4>Location</h4>
+          <p><strong>Latitude:</strong> ${e.lngLat.lat.toFixed(6)}</p>
+          <p><strong>Longitude:</strong> ${e.lngLat.lng.toFixed(6)}</p>
+        </div>
+      </div>
+    `;
+
+    infoBoxContainer.innerHTML = infoContent;
+
+    // Function to update sections as data arrives
+    const updateSection = (sectionId, content) => {
+      const section = document.querySelector(`#${sectionId}`);
+      if (section) {
+        section.innerHTML = `<h4>${
+          section.querySelector("h4").textContent
+        }</h4>${content}`;
+      }
+    };
+
+    // Fetch and update zoning data
+    fetch(zoningUrl)
+      .then((response) => response.json())
+      .then((zoningData) => {
+        let content = "";
+        if (zoningData.features && zoningData.features.length > 0) {
+          content += `<p><strong>Primary Zone:</strong> ${zoningData.features[0].attributes.primary_}</p>`;
+          content += `<p><strong>Secondary Zone:</strong> ${zoningData.features[0].attributes.secondary}</p>`;
+        } else {
+          content += "<p><em>No zoning data available</em></p>";
+        }
+        updateSection("zoning-section", content);
+      })
+      .catch(() =>
+        updateSection(
+          "zoning-section",
+          "<p><em>Error loading zoning data</em></p>"
+        )
+      );
+
+    // Fetch and update development controls
+    const updateDevelopmentSection = () => {
+      let content = "";
+      let loadedData = {
+        lots: null,
+        bushfire: null,
+      };
+
+      const updateContent = () => {
+        content = "";
+        if (loadedData.lots) {
+          content += `<p><strong>Lot Area:</strong> ${Number(
+            loadedData.lots.area
+          ).toFixed(2)}m²</p>`;
+          content += `<p><strong>Lot ID:</strong> ${loadedData.lots.id}</p>`;
+        }
+        if (loadedData.bushfire) {
+          content += `<p><strong>Bushfire Category:</strong> ${loadedData.bushfire.category}</p>`;
+        }
+        updateSection(
+          "development-section",
+          content || "<p><em>No development controls available</em></p>"
+        );
+      };
+
+      // Lots
+      fetch(lotsUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.features && data.features.length > 0) {
+            loadedData.lots = {
+              area: data.features[0].attributes.st_area(shape),
+              id: data.features[0].attributes.lotplan,
+            };
+          }
+          updateContent();
+        });
+
+      // Bushfire
+      fetch(bushfireUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.features && data.features.length > 0) {
+            loadedData.bushfire = {
+              category: data.features[0].attributes.OVL2_CAT,
+            };
+          }
+          updateContent();
+        });
+    };
+
+    updateDevelopmentSection();
+  });
+
+  var nav = new mapboxgl.NavigationControl({
+    showCompass: true,
+    showZoom: true,
+  });
+
+  map.addControl(nav, "top-right");
+</script>
+
+<script>
+  function triggerQLDPlanning() {
+    var address = document.getElementById("address-box").value;
+    hideErrorMessage();
+
+    if (!address.trim()) {
+      showErrorMessage("Please drop a marker on a site before proceeding.");
+      return;
+    }
+
+    displaySpinner();
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          var blob = new Blob([xhr.response], {
+            type: "application/octet-stream",
+          });
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "qld_planning.3dm";
+          a.click();
+          hideSpinner();
+        } else {
+          console.error("Error:", xhr.status, xhr.statusText);
+          showErrorMessage("Error: " + xhr.statusText);
+          hideSpinner();
+        }
+      }
+    };
+    xhr.open(
+      "GET",
+      "{{ url_for('qld_planning') }}?address=" + encodeURIComponent(address),
+      true
+    );
+    xhr.responseType = "blob";
+    xhr.send();
+  }
+</script>
+{% endblock %}
