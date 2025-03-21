@@ -670,7 +670,7 @@ def register_routes(application):
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {   latitude_iso}?contours_minutes=5&polygons=true&access_token= globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {   latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
 
         iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
 
