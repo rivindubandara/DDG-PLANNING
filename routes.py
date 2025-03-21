@@ -167,12 +167,11 @@ def register_routes(application):
         contours_layer_EIndex = rhinoutils.create_layer(
             planning_model, "CONTOURS ELEVATED", (191, 191, 191, 255), elevated_layerIndex)
 
-        gh_raster_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\image.ghx")
+
         gh_topography_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\topography.ghx")
+            r"./gh_scripts/topography.ghx")
         gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\elevate_buildings.ghx")
+            r"./gh_scripts/elevate_buildings.ghx")
 
         params_dict = {
             urls.nsw_adminboundaries_url: params,
@@ -562,12 +561,11 @@ def register_routes(application):
         contours_layer_EIndex = rhinoutils.create_layer(
             qld_planning, "CONTOURS ELEVATED", (191, 191, 191, 255), elevated_layerIndex)
 
-        gh_raster_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\image.ghx")
+
         gh_topography_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\topography.ghx")
+            r"./gh_scripts/topography.ghx")
         gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\elevate_buildings.ghx")
+            r"./gh_scripts/elevate_buildings.ghx")
 
         params_dict = {
             urls.qld_adminboundaries_url: params,
@@ -855,20 +853,10 @@ def register_routes(application):
         contours_layer_EIndex = rhinoutils.create_layer(
             vic_planning, "CONTOURS ELEVATED", (191, 191, 191, 255), elevated_layerIndex)
 
-        gh_admin_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\admin.ghx")
-        gh_zoning_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\vic_qld_zoning.ghx")
-        gh_bushfire_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\bushfire.ghx")
-        gh_roads_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\roads.ghx")
-        gh_raster_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\image.ghx")
         gh_topography_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\topography.ghx")
+            r"./gh_scripts/topography.ghx")
         gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\elevate_buildings.ghx")
+            r"./gh_scripts/elevate_buildings.ghx")
 
         params_dict = {
             urls.vic_adminboundaries_url: params,
@@ -1153,18 +1141,10 @@ def register_routes(application):
         contours_layer_EIndex = rhinoutils.create_layer(
             tas_planning, "CONTOURS ELEVATED", (191, 191, 191, 255), elevated_layerIndex)
 
-        gh_admin_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\admin.ghx")
-        gh_zoning_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\vic_qld_zoning.ghx")
-        gh_roads_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\roads.ghx")
-        gh_raster_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\image.ghx")
         gh_topography_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\topography.ghx")
+            r"./gh_scripts/topography.ghx")
         gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\elevate_buildings.ghx")
+            r"./gh_scripts/elevate_buildings.ghx")
 
         params_dict = {
             urls.tas_boundary_url: l_params,
@@ -1428,18 +1408,10 @@ def register_routes(application):
         contours_layer_EIndex = rhinoutils.create_layer(
             act_planning, "CONTOURS ELEVATED", (191, 191, 191, 255), elevated_layerIndex)
 
-        gh_admin_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\admin.ghx")
-        gh_zoning_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\vic_qld_zoning.ghx")
-        gh_roads_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\roads.ghx")
-        gh_raster_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\image.ghx")
         gh_topography_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\topography.ghx")
+            r"./gh_scripts/topography.ghx")
         gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\elevate_buildings.ghx")
+            r"./gh_scripts/elevate_buildings.ghx")
 
         params_dict = {
             urls.act_boundary_url: params,
@@ -1645,11 +1617,9 @@ def register_routes(application):
             speckle_model, "BOUNDARY ELEVATED", (191, 191, 191, 255))
 
         gh_topography_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\topography.ghx")
+            r"./gh_scripts/topography.ghx")
         gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\elevate_buildings.ghx")
-        gh_roads_decoded = geoutils.encode_ghx_file(
-            r"gh_scripts\\roads.ghx")
+            r"./gh_scripts/elevate_buildings.ghx")
 
         params_dict = {
             urls.nsw_lots_url: params,
