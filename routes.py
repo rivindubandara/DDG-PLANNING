@@ -360,9 +360,9 @@ def register_routes(application):
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes = 5 & polygons = true & access_token = {globals_var.mapbox_access_token}'
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes = 10 & polygons = true & access_token = {globals_var.mapbox_access_token}'
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes = 15 & polygons = true & access_token = {globals_var.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals_var.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals_var.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals_var.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -670,11 +670,11 @@ def register_routes(application):
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {   latitude_iso}?contours_minutes = 5 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {   latitude_iso}?contours_minutes=5&polygons=true&access_token= globals.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes = 10 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, { latitude_iso}?contours_minutes = 15 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, { latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -945,11 +945,11 @@ def register_routes(application):
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes = 5 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes = 10 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes = 15 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -1223,11 +1223,11 @@ def register_routes(application):
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, { latitude_iso}?contours_minutes = 5 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, { latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes = 10 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, { latitude_iso}?contours_minutes = 15 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, { latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -1490,11 +1490,11 @@ def register_routes(application):
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, { latitude_iso}?contours_minutes = 5 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, { latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes = 10 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, { latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes = 15 & polygons = true & access_token = {globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -1667,10 +1667,6 @@ def register_routes(application):
 
         mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex,
                                       bound_curve, gh_buildings_elevated_decoded, speckle_model, globals.transformer2, mesh_geo_list)
-
-        # roads
-        rhinoutils.add_roads_to_model(
-            tiles, zoom, gh_roads_decoded, road_layerIndex, speckle_model, transformer=globals.transformer2)
 
         # lots
         rhinoutils.add_to_model(lots_data, lots_layerIndex,
