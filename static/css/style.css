@@ -948,3 +948,21 @@ body {
   font-size: 20px;
   color: white !important;
 }
+/* Keep text white on hover but let icon change to black */
+.menu > ul > li > a:hover .text {
+  color: white !important; /* Keep text white */
+}
+
+.menu > ul > li > a:hover .icon {
+  color: black !important; /* Keep icon changing to black */
+}
+
+/* Ensure text stays white in all states */
+.menu > ul > li > a .text {
+  color: white !important;
+}
+
+/* Keep hover background effect */
+.menu > ul > li > a:hover {
+  background-color: white !important;
+}
