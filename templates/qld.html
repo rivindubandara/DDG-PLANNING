@@ -480,7 +480,7 @@ content %}
         content = "";
         if (loadedData.lots) {
           content += `<p><strong>Lot Area:</strong> ${Number(
-            loadedData.lots.area
+            loadedData.lots.area 
           ).toFixed(2)}m²</p>`;
           content += `<p><strong>Lot ID:</strong> ${loadedData.lots.id}</p>`;
         }
@@ -499,7 +499,7 @@ content %}
         .then((data) => {
           if (data.features && data.features.length > 0) {
             loadedData.lots = {
-              area: data.features[0].attributes.st_area(shape),
+              area: data.features[0].attributes.lot_area,
               id: data.features[0].attributes.lotplan,
             };
           }
