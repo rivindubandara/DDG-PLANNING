@@ -448,11 +448,11 @@ content %}
       const updateContent = () => {
         content = "";
         if (loadedData.lots) {
-          content += `<p><strong>Block:</strong> ${loadedData.lots.BLOCK_NUMBER}</p>`;
-          content += `<p><strong>Section:</strong> ${loadedData.lots.SECTION_NUMBER}</p>`;
-          if (loadedData.lots.SHAPE_Area) {
+          content += `<p><strong>Block:</strong> ${loadedData.lots.block}</p>`;
+          content += `<p><strong>Section:</strong> ${loadedData.lots.section}</p>`;
+          if (loadedData.lots.area) {
             content += `<p><strong>Lot Area:</strong> ${Number(
-              loadedData.lots.SHAPE_Area
+              loadedData.lots.area
             ).toFixed(2)}m²</p>`;
           }
         }

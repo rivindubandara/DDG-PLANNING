@@ -430,7 +430,7 @@ content %}
 
     // Query APIs and show info box
     const zoningUrl = `https://plan-gis.mapshare.vic.gov.au/arcgis/rest/services/Planning/Vicplan_PlanningSchemeZones/MapServer/0/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const lotsUrl = `https://vicmap.land.vic.gov.au/hosting/rest/services/vicmap/Vicmap_Parcel/MapServer/0/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+    const lotsUrl = `https://services6.arcgis.com/GB33F62SbDxJjwEL/arcgis/rest/services/Vicmap_Parcel/FeatureServer/0/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
     const bushfireUrl = `https://plan-gis.mapshare.vic.gov.au/arcgis/rest/services/Planning/VicPlan_Bushfire/MapServer/1/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
     const heritageUrl = `https://plan-gis.mapshare.vic.gov.au/arcgis/rest/services/Planning/VicPlan_Heritage/MapServer/2/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
     const floodUrl = `https://enterprise.mapshare.vic.gov.au/server/rest/services/Zones_and_Overlays/MapServer/11/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
@@ -508,7 +508,10 @@ content %}
       const updateContent = () => {
         content = "";
         if (loadedData.lots) {
-          content += `<p><strong>Lot ID:</strong> ${loadedData.lots.parcel_spi}</p>`;
+          content += `<p><strong>Lot ID:</strong> ${loadedData.lots.id}</p>`;
+          content += `<p><strong>Lot Area:</strong> ${Number(
+            loadedData.lots.area
+          ).toFixed(2)} m²</p>`;
         }
         if (loadedData.heritage) {
           content += `<p><strong>Heritage Status:</strong> ${loadedData.heritage.SITE_NAME}</p>`;
@@ -525,8 +528,8 @@ content %}
         .then((data) => {
           if (data.features && data.features.length > 0) {
             loadedData.lots = {
-              area: data.features[0].attributes.AREA_M2,
-              id: data.features[0].attributes.PARCEL_PFI,
+              area: data.features[0].attributes.Shape__Area,
+              id: data.features[0].attributes.parcel_spi,
             };
           }
           updateContent();

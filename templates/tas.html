@@ -431,8 +431,14 @@ content %}
 
       const updateContent = () => {
         content = "";
+        if (loadedData.lots) {
+          content += `<p><strong>Lot ID:</strong> ${loadedData.lots.pid}</p>`;
+          content += `<p><strong>Lot Area:</strong> ${Number(
+            loadedData.lots.area
+          ).toFixed(2)} m²</p>`;
+        }
         if (loadedData.heritage) {
-          content += `<p><strong>Heritage:</strong> ${loadedData.heritage.THR_NAME}</p>`;
+          content += `<p><strong>Heritage:</strong> ${loadedData.heritage.type}</p>`;
         }
         updateSection(
           "development-section",
@@ -447,7 +453,7 @@ content %}
           if (data.features && data.features.length > 0) {
             loadedData.lots = {
               pid: data.features[0].attributes.PID,
-              area: data.features[0].attributes.AREA,
+              area: data.features[0].attributes.COMP_AREA,
             };
           }
           updateContent();
