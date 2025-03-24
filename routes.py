@@ -388,7 +388,7 @@ def register_routes(application):
         #                                           ras_xmax_LL, ras_ymax_LL, zooms=16))
 
         # rhinoutils.add_raster(ras_tiles, zoom, gh_raster_decoded,
-        #                       raster_layerIndex, planning_model, transformer=globals.transformer2)
+        #                       raster_layerIndex, planning_model, transformer=globals_var.transformer2)
 
         # buildings
         mapboxfetcher.mapbox_buildings(
@@ -658,21 +658,21 @@ def register_routes(application):
 
         # Native
         rhinoutils.add_native(urls.native_url, native_post, native_layerIndex,
-                              qld_planning, transformer=globals.transformer2)
+                              qld_planning, transformer=globals_var.transformer2)
 
         # Roads
         rhinoutils.add_roads_to_model(
-            tiles, zoom, road_layerIndex, qld_planning, transformer=globals.transformer2)
+            tiles, zoom, road_layerIndex, qld_planning, transformer=globals_var.transformer2)
 
         # Isochrone
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso},{latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso},{latitude_iso}?contours_minutes=5&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso},{latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso},{latitude_iso}?contours_minutes=10&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso},{latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso},{latitude_iso}?contours_minutes=15&polygons=true&access_token={globals_var.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -685,45 +685,45 @@ def register_routes(application):
 
         # Walking Curves
         rhinoutils.add_isochrone_to_model(
-            walking_data, walking_layerIndex, qld_planning, transformer=globals.transformer2)
+            walking_data, walking_layerIndex, qld_planning, transformer=globals_var.transformer2)
 
         # Cycling Curves
         rhinoutils.add_isochrone_to_model(
-            cycling_data, cycling_layerIndex, qld_planning, transformer=globals.transformer2)
+            cycling_data, cycling_layerIndex, qld_planning, transformer=globals_var.transformer2)
 
         # Driving Curves
         rhinoutils.add_isochrone_to_model(
-            driving_data, driving_layerIndex, qld_planning, transformer=globals.transformer2)
+            driving_data, driving_layerIndex, qld_planning, transformer=globals_var.transformer2)
 
         # ras_tiles = list(imports.mercantile.tiles(ras_xmin_LL, ras_ymin_LL,
         #                                           ras_xmax_LL, ras_ymax_LL, zooms=16))
 
         # rhinoutils.add_raster(ras_tiles, zoom, gh_raster_decoded,
-        #                       raster_layerIndex, qld_planning, transformer=globals.transformer2)
+        #                       raster_layerIndex, qld_planning, transformer=globals_var.transformer2)
 
         # buildings
         mapboxfetcher.mapbox_buildings(
-            tiles, zoom, building_layerIndex, qld_planning, transformer=globals.transformer2)
+            tiles, zoom, building_layerIndex, qld_planning, transformer=globals_var.transformer2)
 
         # topography
         rhinoutils.add_contours(
             topography_data, contours_layerIndex, qld_planning, 'elevation_m')
 
         mesh_geo_list = mapboxfetcher.mapbox_topo(topography_data, 'elevation_m', contours_layer_EIndex,
-                                                  qld_planning, globals.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
+                                                  qld_planning, globals_var.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
 
         mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex,
-                                      bound_curve, gh_buildings_elevated_decoded, qld_planning, globals.transformer2, mesh_geo_list)
+                                      bound_curve, gh_buildings_elevated_decoded, qld_planning, globals_var.transformer2, mesh_geo_list)
 
         # giraffe
         if 'giraffeInput' in request.files:
             giraffe_file = request.files['giraffeInput']
             rhinoutils.giraffe(giraffe_file, qld_planning,
-                               transformer=globals.transformer2)
+                               transformer=globals_var.transformer2)
         else:
             pass
 
-        cen_x, cen_y = globals.transformer2.transform(lon, lat)
+        cen_x, cen_y = globals_var.transformer2.transform(lon, lat)
         centroid = imports.rh.Point3d(cen_x, cen_y, 0)
 
         translation_vector = imports.rh.Vector3d(
@@ -933,21 +933,21 @@ def register_routes(application):
 
         # Native
         rhinoutils.add_native(urls.native_url, native_post, native_layerIndex,
-                              vic_planning, transformer=globals.transformer2_vic)
+                              vic_planning, transformer=globals_var.transformer2_vic)
 
         # Roads
         rhinoutils.add_roads_to_model(
-            tiles, zoom, road_layerIndex, vic_planning, transformer=globals.transformer2_vic)
+            tiles, zoom, road_layerIndex, vic_planning, transformer=globals_var.transformer2_vic)
 
         # Isochrone
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals_var.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -960,25 +960,25 @@ def register_routes(application):
 
         # Walking Curves
         rhinoutils.add_isochrone_to_model(
-            walking_data, walking_layerIndex, vic_planning, transformer=globals.transformer2_vic)
+            walking_data, walking_layerIndex, vic_planning, transformer=globals_var.transformer2_vic)
 
         # Cycling Curves
         rhinoutils.add_isochrone_to_model(
-            cycling_data, cycling_layerIndex, vic_planning, transformer=globals.transformer2_vic)
+            cycling_data, cycling_layerIndex, vic_planning, transformer=globals_var.transformer2_vic)
 
         # Driving Curves
         rhinoutils.add_isochrone_to_model(
-            driving_data, driving_layerIndex, vic_planning, transformer=globals.transformer2_vic)
+            driving_data, driving_layerIndex, vic_planning, transformer=globals_var.transformer2_vic)
 
         # ras_tiles = list(imports.mercantile.tiles(ras_xmin_LL, ras_ymin_LL,
         #                                           ras_xmax_LL, ras_ymax_LL, zooms=16))
 
         # rhinoutils.add_raster(ras_tiles, zoom, gh_raster_decoded,
-        #                       raster_layerIndex, vic_planning, transformer=globals.transformer2_vic)
+        #                       raster_layerIndex, vic_planning, transformer=globals_var.transformer2_vic)
 
         # buildings
         mapboxfetcher.mapbox_buildings(
-            tiles, zoom, building_layerIndex, vic_planning, transformer=globals.transformer2_vic)
+            tiles, zoom, building_layerIndex, vic_planning, transformer=globals_var.transformer2_vic)
 
         # topography
         rhinoutils.add_contours(
@@ -988,17 +988,17 @@ def register_routes(application):
         if 'giraffeInput' in request.files:
             giraffe_file = request.files['giraffeInput']
             rhinoutils.giraffe(giraffe_file, vic_planning,
-                               transformer=globals.transformer2_vic)
+                               transformer=globals_var.transformer2_vic)
         else:
             pass
 
         mesh_geo_list = mapboxfetcher.mapbox_topo(topography_data, 'altitude', contours_layer_EIndex,
-                                                  vic_planning, globals.transformer2_vic, lon, lat, gh_topography_decoded, topography_layerIndex)
+                                                  vic_planning, globals_var.transformer2_vic, lon, lat, gh_topography_decoded, topography_layerIndex)
 
         mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex, bound_curve,
-                                      gh_buildings_elevated_decoded, vic_planning, globals.transformer2_vic, mesh_geo_list)
+                                      gh_buildings_elevated_decoded, vic_planning, globals_var.transformer2_vic, mesh_geo_list)
 
-        cen_x, cen_y = globals.transformer2_vic.transform(lon, lat)
+        cen_x, cen_y = globals_var.transformer2_vic.transform(lon, lat)
         centroid = imports.rh.Point3d(cen_x, cen_y, 0)
 
         translation_vector = imports.rh.Vector3d(
@@ -1207,11 +1207,11 @@ def register_routes(application):
 
         # Native
         rhinoutils.add_native(urls.native_url, native_post, native_layerIndex,
-                              tas_planning, transformer=globals.transformer2_vic)
+                              tas_planning, transformer=globals_var.transformer2_vic)
 
         # Roads
         rhinoutils.add_roads_to_model(tiles, zoom,
-                                      road_layerIndex, tas_planning, transformer=globals.transformer2_vic)
+                                      road_layerIndex, tas_planning, transformer=globals_var.transformer2_vic)
 
         # Heritage
         rhinoutils.add_to_model(
@@ -1221,11 +1221,11 @@ def register_routes(application):
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals_var.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -1238,25 +1238,25 @@ def register_routes(application):
 
         # Walking Curves
         rhinoutils.add_isochrone_to_model(
-            walking_data, walking_layerIndex, tas_planning, transformer=globals.transformer2_vic)
+            walking_data, walking_layerIndex, tas_planning, transformer=globals_var.transformer2_vic)
 
         # Cycling Curves
         rhinoutils.add_isochrone_to_model(
-            cycling_data, cycling_layerIndex, tas_planning, transformer=globals.transformer2_vic)
+            cycling_data, cycling_layerIndex, tas_planning, transformer=globals_var.transformer2_vic)
 
         # Driving Curves
         rhinoutils.add_isochrone_to_model(
-            driving_data, driving_layerIndex, tas_planning, transformer=globals.transformer2_vic)
+            driving_data, driving_layerIndex, tas_planning, transformer=globals_var.transformer2_vic)
 
         # ras_tiles = list(imports.mercantile.tiles(ras_xmin_LL, ras_ymin_LL,
         #                                           ras_xmax_LL, ras_ymax_LL, zooms=16))
 
         # rhinoutils.add_raster(ras_tiles, zoom, gh_raster_decoded,
-        #                       raster_layerIndex, tas_planning, transformer=globals.transformer2_vic)
+        #                       raster_layerIndex, tas_planning, transformer=globals_var.transformer2_vic)
 
         # buildings
         mapboxfetcher.mapbox_buildings(
-            tiles, zoom, building_layerIndex, tas_planning, transformer=globals.transformer2_vic)
+            tiles, zoom, building_layerIndex, tas_planning, transformer=globals_var.transformer2_vic)
 
         # topography
         rhinoutils.add_contours(
@@ -1266,17 +1266,17 @@ def register_routes(application):
         if 'giraffeInput' in request.files:
             giraffe_file = request.files['giraffeInput']
             rhinoutils.giraffe(giraffe_file, tas_planning,
-                               transformer=globals.transformer2_vic)
+                               transformer=globals_var.transformer2_vic)
         else:
             pass
 
         mesh_geo_list = mapboxfetcher.mapbox_topo(topography_data, 'ELEVATION', contours_layer_EIndex,
-                                                  tas_planning, globals.transformer2_vic, lon, lat, gh_topography_decoded, topography_layerIndex)
+                                                  tas_planning, globals_var.transformer2_vic, lon, lat, gh_topography_decoded, topography_layerIndex)
 
         mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex,
-                                      bound_curve, gh_buildings_elevated_decoded, tas_planning, globals.transformer2_vic, mesh_geo_list)
+                                      bound_curve, gh_buildings_elevated_decoded, tas_planning, globals_var.transformer2_vic, mesh_geo_list)
 
-        cen_x, cen_y = globals.transformer2_vic.transform(lon, lat)
+        cen_x, cen_y = globals_var.transformer2_vic.transform(lon, lat)
         centroid = imports.rh.Point3d(cen_x, cen_y, 0)
 
         translation_vector = imports.rh.Vector3d(
@@ -1478,21 +1478,21 @@ def register_routes(application):
 
         # Native
         rhinoutils.add_native(urls.native_url, native_post, native_layerIndex,
-                              act_planning, transformer=globals.transformer2)
+                              act_planning, transformer=globals_var.transformer2)
 
         # Roads
         rhinoutils.add_roads_to_model(tiles, zoom,
-                                      road_layerIndex, act_planning, transformer=globals.transformer2)
+                                      road_layerIndex, act_planning, transformer=globals_var.transformer2)
 
         # Isochrone
         longitude_iso = lon
         latitude_iso = lat
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals.mapbox_access_token}'
+        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals_var.mapbox_access_token}'
 
         iso_response_w = imports.requests.get(iso_url_w)
         walking_data = imports.json.loads(iso_response_w.content.decode())
@@ -1505,25 +1505,25 @@ def register_routes(application):
 
         # Walking Curves
         rhinoutils.add_isochrone_to_model(
-            walking_data, walking_layerIndex, act_planning, transformer=globals.transformer2)
+            walking_data, walking_layerIndex, act_planning, transformer=globals_var.transformer2)
 
         # Cycling Curves
         rhinoutils.add_isochrone_to_model(
-            cycling_data, cycling_layerIndex, act_planning, transformer=globals.transformer2)
+            cycling_data, cycling_layerIndex, act_planning, transformer=globals_var.transformer2)
 
         # Driving Curves
         rhinoutils.add_isochrone_to_model(
-            driving_data, driving_layerIndex, act_planning, transformer=globals.transformer2)
+            driving_data, driving_layerIndex, act_planning, transformer=globals_var.transformer2)
 
         # ras_tiles = list(imports.mercantile.tiles(ras_xmin_LL, ras_ymin_LL,
         #                                           ras_xmax_LL, ras_ymax_LL, zooms=16))
 
         # rhinoutils.add_raster(ras_tiles, zoom, gh_raster_decoded,
-        #                       raster_layerIndex, act_planning, transformer=globals.transformer2)
+        #                       raster_layerIndex, act_planning, transformer=globals_var.transformer2)
 
         # buildings
         mapboxfetcher.mapbox_buildings(
-            tiles, zoom, building_layerIndex, act_planning, transformer=globals.transformer2)
+            tiles, zoom, building_layerIndex, act_planning, transformer=globals_var.transformer2)
 
         # topography
         rhinoutils.add_contours(
@@ -1533,17 +1533,17 @@ def register_routes(application):
         if 'giraffeInput' in request.files:
             giraffe_file = request.files['giraffeInput']
             rhinoutils.giraffe(giraffe_file, act_planning,
-                               transformer=globals.transformer2)
+                               transformer=globals_var.transformer2)
         else:
             pass
 
         mesh_geo_list = mapboxfetcher.mapbox_topo(topography_data, 'Contour', contours_layer_EIndex,
-                                                  act_planning, globals.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
+                                                  act_planning, globals_var.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
 
         mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex,
-                                      bound_curve, gh_buildings_elevated_decoded, act_planning, globals.transformer2, mesh_geo_list)
+                                      bound_curve, gh_buildings_elevated_decoded, act_planning, globals_var.transformer2, mesh_geo_list)
 
-        cen_x, cen_y = globals.transformer2.transform(lon, lat)
+        cen_x, cen_y = globals_var.transformer2.transform(lon, lat)
         centroid = imports.rh.Point3d(cen_x, cen_y, 0)
 
         translation_vector = imports.rh.Vector3d(
@@ -1653,7 +1653,7 @@ def register_routes(application):
 
         # buildings
         mapboxfetcher.mapbox_buildings(
-            tiles, zoom, building_layerIndex, speckle_model, transformer=globals.transformer2)
+            tiles, zoom, building_layerIndex, speckle_model, transformer=globals_var.transformer2)
 
         # contours
         rhinoutils.add_contours(
@@ -1661,16 +1661,16 @@ def register_routes(application):
 
         # topography
         mesh_geo_list = mapboxfetcher.mapbox_topo(topography_data, 'elevation', contours_layer_EIndex,
-                                                  speckle_model, globals.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
+                                                  speckle_model, globals_var.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
 
         mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex,
-                                      bound_curve, gh_buildings_elevated_decoded, speckle_model, globals.transformer2, mesh_geo_list)
+                                      bound_curve, gh_buildings_elevated_decoded, speckle_model, globals_var.transformer2, mesh_geo_list)
 
         # lots
         rhinoutils.add_to_model(lots_data, lots_layerIndex,
                                 'plannumber', speckle_model)
 
-        cen_x, cen_y = globals.transformer2.transform(lon, lat)
+        cen_x, cen_y = globals_var.transformer2.transform(lon, lat)
         centroid = imports.rh.Point3d(cen_x, cen_y, 0)
 
         translation_vector = imports.rh.Vector3d(-centroid.X, -
@@ -1689,7 +1689,7 @@ def register_routes(application):
         streamName = request.form.get('address')
         client = imports.SpeckleClient(host="https://app.speckle.systems/")
         account = imports.get_account_from_token(
-            token=globals.speckleToken, server_url="https://app.speckle.systems/")
+            token=globals_var.speckleToken, server_url="https://app.speckle.systems/")
         client.authenticate_with_account(account)
         new_stream_id = client.stream.create(name=f'{streamName}')
 

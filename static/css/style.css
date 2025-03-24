@@ -136,6 +136,8 @@ body {
 
 .menu ul li .icon {
   font-size: 20px;
+  color: white !important;
+  display: inline-block;
 }
 
 .menu ul li .text {
@@ -920,4 +922,29 @@ body {
 .menu > ul > li > a:hover .icon,
 .menu > ul > li > a:hover .text {
   color: black !important;
+}
+
+/* Reset and ensure icons are always visible */
+.menu ul li .icon {
+  font-size: 20px;
+  color: white !important;
+  display: inline-block;
+}
+
+/* Hover state for icons */
+.menu ul li a:hover .icon {
+  color: black !important;
+}
+
+/* Active state for icons */
+.menu ul li a:active .icon,
+.menu ul li a:focus .icon {
+  color: white !important;
+}
+
+/* Ensure icons stay visible in collapsed sidebar */
+.sidebar.active .menu ul li a .icon {
+  display: inline-block;
+  font-size: 20px;
+  color: white !important;
 }
