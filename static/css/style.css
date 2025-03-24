@@ -61,7 +61,8 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 0;
   background-color: var(--black-400);
   padding: 24px;
   border-radius: 0px 30px 30px 0px;
@@ -852,4 +853,71 @@ body {
 .sub-menu li a {
   padding: 8px 12px;
   transition: all 0.3s ease;
+}
+
+/* Add styles for the top section */
+.sidebar-top {
+  flex-shrink: 0;
+}
+
+/* Add styles for the middle section */
+.sidebar-middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* This centers the menu content vertically */
+}
+
+/* Add styles for the bottom section */
+.sidebar-bottom {
+  flex-shrink: 0;
+}
+
+/* Add these rules to prevent text/icon color change on click in expanded state */
+.sidebar:not(.active) .menu > ul > li > a:active,
+.sidebar:not(.active) .menu > ul > li > a:focus {
+  background-color: transparent;
+}
+
+.sidebar:not(.active) .menu > ul > li > a:active .text,
+.sidebar:not(.active) .menu > ul > li > a:focus .text {
+  color: white !important;
+}
+
+.sidebar:not(.active) .menu > ul > li > a:active .icon,
+.sidebar:not(.active) .menu > ul > li > a:focus .icon {
+  color: white !important;
+}
+
+/* Keep hover effect working */
+.sidebar:not(.active) .menu > ul > li > a:hover {
+  background-color: white !important;
+}
+
+.sidebar:not(.active) .menu > ul > li > a:hover .icon,
+.sidebar:not(.active) .menu > ul > li > a:hover .text {
+  color: black !important;
+}
+
+/* Prevent text/icon color change on click for both expanded and collapsed states */
+.menu > ul > li > a:active,
+.menu > ul > li > a:focus {
+  background-color: transparent !important;
+}
+
+.menu > ul > li > a:active .text,
+.menu > ul > li > a:focus .text,
+.menu > ul > li > a:active .icon,
+.menu > ul > li > a:focus .icon {
+  color: white !important;
+}
+
+/* Keep hover effects working */
+.menu > ul > li > a:hover {
+  background-color: white !important;
+}
+
+.menu > ul > li > a:hover .icon,
+.menu > ul > li > a:hover .text {
+  color: black !important;
 }

@@ -6,13 +6,12 @@ content %}
     <div class="menu-btn">
       <i class="ph ph-caret-left"></i>
     </div>
-    <div class="head">
-      <div class="logo">
-        <a href="{{ url_for('index') }}"
-          ><img src="../static/images/dd_logo.png" alt=""
-        /></a>
-      </div>
+    <div class="logo">
+      <a href="{{ url_for('index') }}"
+        ><img src="../static/images/dd_logo.png" alt=""
+      /></a>
     </div>
+    <div style="flex: 1"></div>
     <div class="menu">
       <p class="title">Model</p>
       <ul>
@@ -104,18 +103,6 @@ content %}
           name="giraffeInput"
           style="display: none"
         />
-        <!-- <li>
-          <a href="#" onclick="triggerSpeckle()">
-            <i class="icon ph ph-cube"></i>
-            <span class="text">SPECKLE</span>
-          </a>
-        </li> -->
-        <!-- <li>
-          <a href="#">
-            <i class="icon ph ph-wrench"></i>
-            <span class="text">TOOLS</span>
-          </a>
-        </li> -->
       </ul>
     </div>
     <div class="menu">
@@ -136,6 +123,7 @@ content %}
         </li>
       </ul>
     </div>
+    <div style="flex: 1"></div>
     <div class="head">
       <div class="logo">
         <a href="https://www.nettletontribe.com.au/"
@@ -711,3 +699,15 @@ content %}
   }
 </script>
 {% endblock %}
+
+<style>
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .menu {
+    flex-shrink: 0; /* Prevents menu from shrinking */
+  }
+</style>
