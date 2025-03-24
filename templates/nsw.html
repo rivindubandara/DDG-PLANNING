@@ -114,6 +114,12 @@ content %}
             <span class="text">HELP</span>
           </a>
         </li>
+        <li>
+          <a href="#" onclick="openNSWPropertyReport()">
+            <i class="icon ph ph-notebook"></i>
+            <span class="text">PROPERTY REPORT</span>
+          </a>
+        </li>
         <p class="title">States</p>
         <li class="last-menu-item">
           <a href="#">
@@ -632,6 +638,7 @@ content %}
     }
 
     displaySpinner();
+
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -698,6 +705,58 @@ content %}
     xhr.send();
   }
 </script>
+
+<script>
+  function openNSWPropertyReport() {
+    const address = document.getElementById("address-box")?.value;
+
+    if (!address || !address.trim()) {
+      alert(
+        "Please drop a marker to select a property before opening the report."
+      );
+      return;
+    }
+
+    displaySpinner();
+
+    const searchUrl = `https://api.apps1.nsw.gov.au/planning/viewersf/V1/ePlanningApi/address?a=${encodeURIComponent(
+      address
+    )}&noOfRecords=1`;
+
+    fetch(searchUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.length || !data[0].propId) {
+          alert("No property found for this address.");
+          return;
+        }
+
+        const propId = data[0].propId;
+        const reportRequestUrl = `https://api.apps1.nsw.gov.au/planning/viewersf/V1/ePlanningApi/report?id=${propId}&Type=property`;
+
+        // Call the report endpoint to get the real PDF URL
+        return fetch(reportRequestUrl)
+          .then((res) => res.json())
+          .then((reportData) => {
+            if (reportData.success && reportData.reportUrl) {
+              window.open(reportData.reportUrl, "_blank");
+            } else {
+              alert("Failed to generate property report.");
+            }
+          });
+      })
+      .catch((error) => {
+        console.error("Property Report Error:", error);
+        showErrorMessage(
+          error.message || "An error occurred while generating the report."
+        );
+      })
+      .finally(() => {
+        hideSpinner();
+      });
+  }
+</script>
+
 {% endblock %}
 
 <style>
