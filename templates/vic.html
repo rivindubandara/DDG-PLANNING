@@ -17,7 +17,7 @@ content %}
       <ul>
         <li>
           <a href="#" onclick="triggerVICPlanning()">
-            <i class="icon ph ph-strategy"></i>
+            <i class="icon ph ph-building"></i>
             <span class="text">GENERATE</span>
           </a>
         </li>
@@ -433,8 +433,7 @@ content %}
     const lotsUrl = `https://services6.arcgis.com/GB33F62SbDxJjwEL/arcgis/rest/services/Vicmap_Parcel/FeatureServer/0/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
     const bushfireUrl = `https://plan-gis.mapshare.vic.gov.au/arcgis/rest/services/Planning/VicPlan_Bushfire/MapServer/1/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
     const heritageUrl = `https://plan-gis.mapshare.vic.gov.au/arcgis/rest/services/Planning/VicPlan_Heritage/MapServer/2/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const floodUrl = `https://enterprise.mapshare.vic.gov.au/server/rest/services/Zones_and_Overlays/MapServer/11/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-
+    const floodUrl = `https://enterprise.mapshare.vic.gov.au/server/rest/services/Zones_and_Overlays/MapServer/11/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;    
     // Create and show initial info box structure
     const infoBoxContainer =
       document.getElementById("fixed-info-container") ||
