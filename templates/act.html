@@ -2,7 +2,7 @@
 content %}
 
 <div class="container">
-  <div class="sidebar active">  
+  <div class="sidebar active">
     <div class="menu-btn">
       <i class="ph ph-caret-left"></i>
     </div>
@@ -372,14 +372,119 @@ content %}
       mapboxgl.accessToken +
       "&types=address";
 
+    // Define ACT URLs here so they're in scope
+    const lotsUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer/66/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+    const heritageUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/heritage/MapServer/3/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+
     $.get(url, function (data) {
       if (data.features.length > 0) {
         const address = data.features[0].place_name;
         $("#" + addressFieldId).val(address);
+
+        // Create info box with the new address
+        const infoBoxContainer =
+          document.getElementById("fixed-info-container") ||
+          document.createElement("div");
+        infoBoxContainer.id = "fixed-info-container";
+        document.body.appendChild(infoBoxContainer);
+
+        let infoContent = `
+          <div class="fixed-info-box">
+            <h3>Site Information</h3>
+            <p><strong>Address:</strong> ${address}</p>
+            <div class="info-section" id="development-section">
+              <h4>Development Controls</h4>
+              <p><em>Loading development controls...</em></p>
+            </div>
+            
+            <div class="info-section" id="location-section">
+              <h4>Location</h4>
+              <p><strong>Latitude:</strong> ${coordinates.lat.toFixed(6)}</p>
+              <p><strong>Longitude:</strong> ${coordinates.lng.toFixed(6)}</p>
+            </div>
+          </div>
+        `;
+
+        infoBoxContainer.innerHTML = infoContent;
+
+        // Function to update sections as data arrives
+        const updateSection = (sectionId, content) => {
+          const section = document.querySelector(`#${sectionId}`);
+          if (section) {
+            section.innerHTML = `<h4>${
+              section.querySelector("h4").textContent
+            }</h4>${content}`;
+          }
+        };
+
+        // Development controls data structure
+        let loadedData = {
+          lots: null,
+          heritage: null,
+        };
+
+        const updateContent = () => {
+          let content = "";
+          if (loadedData.lots) {
+            if (loadedData.lots.block) {
+              content += `<p><strong>Block:</strong> ${loadedData.lots.block}</p>`;
+            }
+            if (loadedData.lots.section) {
+              content += `<p><strong>Section:</strong> ${loadedData.lots.section}</p>`;
+            }
+            if (loadedData.lots.area) {
+              content += `<p><strong>Lot Area:</strong> ${Number(
+                loadedData.lots.area
+              ).toFixed(2)}m²</p>`;
+            }
+          }
+          if (loadedData.heritage && loadedData.heritage.place) {
+            content += `<p><strong>Heritage:</strong> ${loadedData.heritage.place}</p>`;
+          }
+          updateSection(
+            "development-section",
+            content || "<p><em>No development controls available</em></p>"
+          );
+        };
+
+        // Lots
+        fetch(lotsUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.features && data.features.length > 0) {
+              loadedData.lots = {
+                block: data.features[0].attributes.BLOCK_NUMBER || "N/A",
+                section: data.features[0].attributes.SECTION_NUMBER || "N/A",
+                area: data.features[0].attributes.SHAPE_Area,
+              };
+            }
+            updateContent();
+          })
+          .catch(() => {
+            console.error("Error fetching lots data");
+            updateContent();
+          });
+
+        // Heritage
+        fetch(heritageUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.features && data.features.length > 0) {
+              loadedData.heritage = {
+                place: data.features[0].attributes.NAME || "Yes",
+              };
+            }
+            updateContent();
+          })
+          .catch(() => {
+            console.error("Error fetching heritage data");
+            updateContent();
+          });
       }
     });
   }
 
+  // Simplified click handler
   map.on("click", function (e) {
     if (marker) {
       marker.remove();
@@ -394,105 +499,6 @@ content %}
       .addTo(map);
 
     mapClickFn(e.lngLat, "address-box");
-
-    // Query APIs and show info box
-    const lotsUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer/66/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const heritageUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/heritage/MapServer/3/query?geometry=${e.lngLat.lng},${e.lngLat.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-
-    // Create and show initial info box structure
-    const infoBoxContainer =
-      document.getElementById("fixed-info-container") ||
-      document.createElement("div");
-    infoBoxContainer.id = "fixed-info-container";
-    document.body.appendChild(infoBoxContainer);
-
-    // Initial content structure
-    let infoContent = `
-      <div class="fixed-info-box">
-        <h3>Site Information</h3>
-        <p><strong>Address:</strong> ${document.getElementById('address-box').value}</p>
-        <div class="info-section" id="development-section">
-          <h4>Development Controls</h4>
-          <p><em>Loading development controls...</em></p>
-        </div>
-        
-        <div class="info-section" id="location-section">
-          <h4>Location</h4>
-          <p><strong>Latitude:</strong> ${e.lngLat.lat.toFixed(6)}</p>
-          <p><strong>Longitude:</strong> ${e.lngLat.lng.toFixed(6)}</p>
-        </div>
-      </div>
-    `;
-
-    infoBoxContainer.innerHTML = infoContent;
-
-    // Function to update sections as data arrives
-    const updateSection = (sectionId, content) => {
-      const section = document.querySelector(`#${sectionId}`);
-      if (section) {
-        section.innerHTML = `<h4>${
-          section.querySelector("h4").textContent
-        }</h4>${content}`;
-      }
-    };
-
-    // Fetch and update development controls
-    const updateDevelopmentSection = () => {
-      let content = "";
-      let loadedData = {
-        lots: null,
-        heritage: null,
-        admin: null,
-      };
-
-      const updateContent = () => {
-        content = "";
-        if (loadedData.lots) {
-          content += `<p><strong>Block:</strong> ${loadedData.lots.block}</p>`;
-          content += `<p><strong>Section:</strong> ${loadedData.lots.section}</p>`;
-          if (loadedData.lots.area) {
-            content += `<p><strong>Lot Area:</strong> ${Number(
-              loadedData.lots.area
-            ).toFixed(2)}m²</p>`;
-          }
-        }
-        if (loadedData.heritage) {
-          content += `<p><strong>Heritage:</strong> ${loadedData.heritage.NAME}</p>`;
-        }
-        updateSection(
-          "development-section",
-          content || "<p><em>No development controls available</em></p>"
-        );
-      };
-
-      // Lots
-      fetch(lotsUrl)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.features && data.features.length > 0) {
-            loadedData.lots = {
-              block: data.features[0].attributes.BLOCK_NUMBER,
-              section: data.features[0].attributes.SECTION_NUMBER,
-              area: data.features[0].attributes.SHAPE_Area,
-            };
-          }
-          updateContent();
-        });
-
-      // Heritage
-      fetch(heritageUrl)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.features && data.features.length > 0) {
-            loadedData.heritage = {
-              place: data.features[0].attributes.NAME,
-            };
-          }
-          updateContent();
-        });
-    };
-
-    updateDevelopmentSection();
   });
 
   var nav = new mapboxgl.NavigationControl({
