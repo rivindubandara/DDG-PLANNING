@@ -117,14 +117,17 @@ body {
 .menu ul li a {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   font-size: 14px;
   font-weight: 500;
   color: white;
   text-decoration: none;
-  padding: 12px 8px;
+  padding: 12px;
   border-radius: 8px;
   transition: all 0.3s;
+  min-width: 45px;
+  min-height: 45px;
 }
 
 .menu ul li > a:hover,
@@ -135,7 +138,7 @@ body {
 }
 
 .menu ul li .icon {
-  font-size: 20px;
+  font-size: 22px;
   color: white !important;
   display: inline-block;
 }
@@ -965,4 +968,58 @@ body {
 /* Keep hover background effect */
 .menu > ul > li > a:hover {
   background-color: white !important;
+}
+
+/* Fix button width and slider interaction */
+.sub-menu li {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sub-menu li a {
+  display: inline-block;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+/* Override any existing styles that might make the button full width */
+.menu ul li > a:hover,
+.menu ul li.active > a,
+.menu ul li > a:active,
+.sub-menu li.active a,
+.sub-menu li a:hover,
+.sub-menu li a:active {
+  width: auto !important;
+  background-color: white;
+}
+
+/* Prevent button from covering slider */
+.opacity-slider {
+  width: calc(100% - 24px);
+  margin: 0 12px 8px 12px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Ensure proper spacing in collapsed sidebar */
+.sidebar.active .sub-menu li {
+  padding: 8px 4px;
+  gap: 5px;
+}
+
+.sidebar.active .opacity-slider {
+  margin: 0 4px 8px 4px;
+}
+
+/* Override any other styles that might affect button width */
+.menu ul li a,
+.sub-menu li a {
+  width: auto !important;
 }

@@ -33,16 +33,43 @@ content %}
               <a href="#">
                 <span class="text">SUBURBS</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="1"
+                data-layer-id="admin-raster-layer"
+              />
             </li>
             <li data-layer-id="cadastre-raster-layer">
               <a href="#">
                 <span class="text">CADASTRE</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="1"
+                data-layer-id="cadastre-raster-layer"
+              />
             </li>
             <li data-layer-id="land-zoning-raster-layer">
               <a href="#">
                 <span class="text">ZONING</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="1"
+                data-layer-id="land-zoning-raster-layer"
+              />
             </li>
             <li data-layer-id="building-layer">
               <a href="#">
@@ -53,21 +80,57 @@ content %}
               <a href="#">
                 <span class="text">BUSHFIRE</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="1"
+                data-layer-id="bushfire-raster-layer"
+              />
             </li>
             <li data-layer-id="heritage-raster-layer">
               <a href="#">
                 <span class="text">HERITAGE</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="1"
+                data-layer-id="heritage-raster-layer"
+              />
             </li>
             <li data-layer-id="Territories">
               <a href="#">
                 <span class="text">NATIVE LAND</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="1"
+                data-layer-id="Territories"
+              />
             </li>
             <li data-layer-id="mapbox-satellite-layer">
               <a href="#">
                 <span class="text">SATELLITE</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="1"
+                data-layer-id="mapbox-satellite-layer"
+              />
             </li>
           </ul>
         </li>
@@ -141,17 +204,21 @@ content %}
     },
   });
 
-  function toggle3DBuildings() {
-    const currentState = map.getConfigProperty("basemap", "show3dObjects");
-    const newState = !currentState;
-
-    map.setConfigProperty("basemap", "show3dObjects", newState);
-  }
-
   document
-    .querySelector('li[data-layer-id="building-layer"]')
-    .addEventListener("click", function () {
-      toggle3DBuildings();
+    .querySelector('li[data-layer-id="building-layer"] a')
+    .addEventListener("click", function (e) {
+      e.preventDefault();
+      const menuItem = this.parentElement;
+      const currentState = map.getConfigProperty("basemap", "show3dObjects");
+      const newState = !currentState;
+
+      map.setConfigProperty("basemap", "show3dObjects", newState);
+
+      if (newState) {
+        menuItem.classList.add("active");
+      } else {
+        menuItem.classList.remove("active");
+      }
     });
 
   map.on("style.load", () => {
@@ -531,6 +598,31 @@ content %}
   });
 
   map.addControl(nav, "top-right");
+
+  document.querySelectorAll(".opacity-slider").forEach((slider) => {
+    slider.addEventListener("mousedown", (e) => e.stopPropagation());
+    slider.addEventListener("click", (e) => e.stopPropagation());
+
+    slider.addEventListener("input", (e) => {
+      const layerId = e.target.dataset.layerId;
+      const opacity = parseFloat(e.target.value);
+
+      const layer = map.getLayer(layerId);
+      if (!layer) return;
+
+      const layerType = layer.type;
+
+      if (layerType === "raster") {
+        map.setPaintProperty(layerId, "raster-opacity", opacity);
+      } else if (layerType === "fill") {
+        map.setPaintProperty(layerId, "fill-opacity", opacity);
+      } else if (layerType === "line") {
+        map.setPaintProperty(layerId, "line-opacity", opacity);
+      } else if (layerType === "symbol") {
+        map.setPaintProperty(layerId, "text-opacity", opacity);
+      }
+    });
+  });
 </script>
 
 <script>
