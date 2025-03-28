@@ -19,3 +19,5 @@ from requests.exceptions import RequestException, Timeout
 import os
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from dotenv import load_dotenv
+import os
