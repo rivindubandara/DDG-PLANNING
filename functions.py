@@ -74,20 +74,19 @@ class ComputeAPI:
 class MapboxFetcher:
     @staticmethod
     def fetch_mapbox_data(zoom, tile):
-        mb_url = f"https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{zoom}/{ tile.x}/{tile.y}.mvt?access_token={mapbox_access_token}"
+        mb_url = f"https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{zoom}/{tile.x}/{tile.y}.mvt?access_token={mapbox_access_token}"
         counter = 0
         while True:
             try:
                 mb_response = imports.requests.get(mb_url)
                 mb_response.raise_for_status()
-                mb_data = mb_response.content
-                return mb_data
+                return mb_response.content
             except imports.requests.exceptions.RequestException as e:
                 counter += 1
                 if counter >= 3:
-                    error_message = e
-                    return imports.jsonify(error=error_message)
-                imports.time.sleep(0)
+                    print(f"Mapbox fetch failed for tile {tile}: {e}")
+                    return None  # or raise e if you want calling code to handle it
+                imports.time.sleep(0.5)
 
     @staticmethod
     def concurrent_fetching(zoom, tile):
