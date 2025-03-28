@@ -4,7 +4,7 @@ import imports
 import functions
 import dicts
 
-from flask import render_template, redirect, url_for, flash, request, send_file
+from flask import render_template, redirect, url_for, flash, request, send_file, jsonify
 import requests
 import aiohttp
 import asyncio
@@ -44,390 +44,392 @@ def register_routes(application):
 
     @application.route('/nsw_planning', methods=['GET', 'POST'])
     def nsw_planning():
-
-        # Geocoding
-        address = request.args.get('address')
-        params = {
-            "text": address,
-            "f": "json",
-            "outFields": "Location"
-        }
-
-        response = imports.requests.get(
-            urls.arcgis_geocoder_url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            if "locations" in data and len(data["locations"]) > 0:
-                location = data["locations"][0]
-                lon = location["feature"]["geometry"]["x"]
-                lat = location["feature"]["geometry"]["y"]
-            else:
-                error_message = "There is something wrong with your address, either you have not dropped a marker or the address is invalid."
-                return imports.jsonify(error=error_message)
-
-        # Boundary calculations
-        xmin_LL, xmax_LL, ymin_LL, ymax_LL = geoutils.create_boundary(
-            lat, lon, 10000)
-        b_xmin_LL, b_xmax_LL, b_ymin_LL, b_ymax_LL = geoutils.create_boundary(
-            lat, lon, 20000)
-        n_xmin_LL, n_xmax_LL, n_ymin_LL, n_ymax_LL = geoutils.create_boundary(
-            lat, lon, 800000)
-        t_xmin_LL, t_xmax_LL, t_ymin_LL, t_ymax_LL = geoutils.create_boundary(
-            lat, lon, 30000)
-        ras_xmin_LL, ras_xmax_LL, ras_ymin_LL, ras_ymax_LL = geoutils.create_boundary(
-            lat, lon, 1000)
-
-        boundary_params = gisparameters.create_parameters(
-            f'{lon},{lat}', 'esriGeometryPoint', xmin_LL, ymin_LL, xmax_LL, ymax_LL, '32756')
-        params = gisparameters.create_parameters(
-            '', 'esriGeometryEnvelope', xmin_LL, ymin_LL, xmax_LL, ymax_LL, '32756')
-        b_params = gisparameters.create_parameters(
-            '', 'esriGeometryEnvelope', b_xmin_LL, b_ymin_LL, b_xmax_LL, b_ymax_LL, '32756')
-        topo_params = gisparameters.create_parameters(
-            '', 'esriGeometryEnvelope', t_xmin_LL, t_ymin_LL, t_xmax_LL, t_ymax_LL, '32756')
-        tiles = list(imports.mercantile.tiles(
-            xmin_LL, ymin_LL, xmax_LL, ymax_LL, zooms=16))
-        zoom = 16
-
-        native_post = {
-            'maps': 'territories',
-            'polygon_geojson': {
-                'type': 'FeatureCollection',
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'properties': {},
-                        'geometry': {
-                            'type': 'Polygon',
-                            'coordinates': [
-                                [
-                                    [n_xmin_LL, n_ymin_LL],
-                                    [n_xmax_LL, n_ymin_LL],
-                                    [n_xmax_LL, n_ymax_LL],
-                                    [n_xmin_LL, n_ymax_LL],
-                                    [n_xmin_LL, n_ymin_LL]
-                                ]
-                            ]
-                        }
-                    }
-                ]
+        try:
+            # Geocoding
+            address = request.args.get('address')
+            params = {
+                "text": address,
+                "f": "json",
+                "outFields": "Location"
             }
-        }
 
-        # Model and layer setup
-        planning_model = imports.rh.File3dm()
-        planning_model.Settings.ModelUnitSystem = imports.rh.UnitSystem.Meters
+            response = imports.requests.get(
+                urls.arcgis_geocoder_url, params=params)
+            if response.status_code == 200:
+                data = response.json()
+                if "locations" in data and len(data["locations"]) > 0:
+                    location = data["locations"][0]
+                    lon = location["feature"]["geometry"]["x"]
+                    lat = location["feature"]["geometry"]["y"]
+                else:
+                    error_message = "There is something wrong with your address, either you have not dropped a marker or the address is invalid."
+                    return imports.jsonify(error=error_message)
 
-        planning_layerIndex = rhinoutils.create_layer(
-            planning_model, "PLANNING", (237, 0, 194, 255))
-        geometry_layerIndex = rhinoutils.create_layer(
-            planning_model, "GEOMETRY", (237, 0, 194, 255))
-        elevated_layerIndex = rhinoutils.create_layer(
-            planning_model, "ELEVATED", (237, 0, 194, 255))
-        boundary_layerIndex = rhinoutils.create_layer(
-            planning_model, "BOUNDARY", (237, 0, 194, 255), planning_layerIndex)
-        admin_layerIndex = rhinoutils.create_layer(
-            planning_model, "ADMIN", (134, 69, 255, 255), planning_layerIndex)
-        native_layerIndex = rhinoutils.create_layer(
-            planning_model, "NATIVE", (134, 69, 255, 255), planning_layerIndex)
-        zoning_layerIndex = rhinoutils.create_layer(
-            planning_model, "ZONING", (255, 180, 18, 255), planning_layerIndex)
-        hob_layerIndex = rhinoutils.create_layer(
-            planning_model, "HOB", (204, 194, 173, 255), planning_layerIndex)
-        lotsize_layerIndex = rhinoutils.create_layer(
-            planning_model, "MLS", (224, 155, 177, 255), planning_layerIndex)
-        fsr_layerIndex = rhinoutils.create_layer(
-            planning_model, "FSR", (173, 35, 204, 255), planning_layerIndex)
-        lots_layerIndex = rhinoutils.create_layer(
-            planning_model, "LOTS", (255, 106, 0, 255), planning_layerIndex)
-        road_layerIndex = rhinoutils.create_layer(
-            planning_model, "ROADS", (145, 145, 145, 255), planning_layerIndex)
-        walking_layerIndex = rhinoutils.create_layer(
-            planning_model, "WALKING", (129, 168, 0, 255), planning_layerIndex)
-        cycling_layerIndex = rhinoutils.create_layer(
-            planning_model, "CYCLING", (0, 168, 168, 255), planning_layerIndex)
-        driving_layerIndex = rhinoutils.create_layer(
-            planning_model, "DRIVING", (168, 0, 121, 255), planning_layerIndex)
-        bushfire_layerIndex = rhinoutils.create_layer(
-            planning_model, "BUSHFIRE", (176, 7, 7, 255), planning_layerIndex)
-        heritage_layerIndex = rhinoutils.create_layer(
-            planning_model, "HERITAGE", (153, 153, 153, 255), planning_layerIndex)
-        # raster_layerIndex = rhinoutils.create_layer(
-        #     planning_model, "RASTER", (0, 204, 0, 255), planning_layerIndex)
-        building_layerIndex = rhinoutils.create_layer(
-            planning_model, "BUILDINGS", (99, 99, 99, 255), geometry_layerIndex)
-        contours_layerIndex = rhinoutils.create_layer(
-            planning_model, "CONTOURS", (191, 191, 191, 255), geometry_layerIndex)
-        boundary_layerEIndex = rhinoutils.create_layer(
-            planning_model, "BOUNDARY ELEVATED", (237, 0, 194, 255), elevated_layerIndex)
-        building_layer_EIndex = rhinoutils.create_layer(
-            planning_model, "BUILDINGS ELEVATED", (99, 99, 99, 255), elevated_layerIndex)
-        topography_layerIndex = rhinoutils.create_layer(
-            planning_model, "TOPOGRAPHY", (191, 191, 191, 255), elevated_layerIndex)
-        contours_layer_EIndex = rhinoutils.create_layer(
-            planning_model, "CONTOURS ELEVATED", (191, 191, 191, 255), elevated_layerIndex)
+            # Boundary calculations
+            xmin_LL, xmax_LL, ymin_LL, ymax_LL = geoutils.create_boundary(
+                lat, lon, 10000)
+            b_xmin_LL, b_xmax_LL, b_ymin_LL, b_ymax_LL = geoutils.create_boundary(
+                lat, lon, 20000)
+            n_xmin_LL, n_xmax_LL, n_ymin_LL, n_ymax_LL = geoutils.create_boundary(
+                lat, lon, 800000)
+            t_xmin_LL, t_xmax_LL, t_ymin_LL, t_ymax_LL = geoutils.create_boundary(
+                lat, lon, 30000)
+            ras_xmin_LL, ras_xmax_LL, ras_ymin_LL, ras_ymax_LL = geoutils.create_boundary(
+                lat, lon, 1000)
 
-        gh_topography_decoded = geoutils.encode_ghx_file(
-            r"./gh_scripts/topography.ghx")
-        gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
-            r"./gh_scripts/elevate_buildings.ghx")
+            boundary_params = gisparameters.create_parameters(
+                f'{lon},{lat}', 'esriGeometryPoint', xmin_LL, ymin_LL, xmax_LL, ymax_LL, '32756')
+            params = gisparameters.create_parameters(
+                '', 'esriGeometryEnvelope', xmin_LL, ymin_LL, xmax_LL, ymax_LL, '32756')
+            b_params = gisparameters.create_parameters(
+                '', 'esriGeometryEnvelope', b_xmin_LL, b_ymin_LL, b_xmax_LL, b_ymax_LL, '32756')
+            topo_params = gisparameters.create_parameters(
+                '', 'esriGeometryEnvelope', t_xmin_LL, t_ymin_LL, t_xmax_LL, t_ymax_LL, '32756')
+            tiles = list(imports.mercantile.tiles(
+                xmin_LL, ymin_LL, xmax_LL, ymax_LL, zooms=16))
+            zoom = 16
 
-        params_dict = {
-            urls.nsw_adminboundaries_url: params,
-            urls.nsw_zoning_url: params,
-            urls.nsw_hob_url: b_params,
-            urls.nsw_lotsize_url: b_params,
-            urls.nsw_fsr_url: b_params,
-            urls.nsw_lots_url: b_params,
-            urls.nsw_bushfire_url: b_params,
-            urls.nsw_heritage_url: b_params,
-            urls.nsw_topo_url: topo_params
-        }
+            native_post = {
+                'maps': 'territories',
+                'polygon_geojson': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'properties': {},
+                            'geometry': {
+                                'type': 'Polygon',
+                                'coordinates': [
+                                    [
+                                        [n_xmin_LL, n_ymin_LL],
+                                        [n_xmax_LL, n_ymin_LL],
+                                        [n_xmax_LL, n_ymax_LL],
+                                        [n_xmin_LL, n_ymax_LL],
+                                        [n_xmin_LL, n_ymin_LL]
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
 
-        MAX_RETRIES = 3  # Maximum retries
-        INITIAL_BACKOFF = 1  # Initial backoff in seconds
+            # Model and layer setup
+            planning_model = imports.rh.File3dm()
+            planning_model.Settings.ModelUnitSystem = imports.rh.UnitSystem.Meters
 
-        async def fetch_paginated_data(session, url, params):
-            """Fetch all paginated results from an API."""
-            all_features = []
-            while True:
-                try:
-                    async with session.get(url, params=params, timeout=30) as response:
-                        if response.status == 200:
-                            text = await response.text()
-                            data = imports.json.loads(text)
+            planning_layerIndex = rhinoutils.create_layer(
+                planning_model, "PLANNING", (237, 0, 194, 255))
+            geometry_layerIndex = rhinoutils.create_layer(
+                planning_model, "GEOMETRY", (237, 0, 194, 255))
+            elevated_layerIndex = rhinoutils.create_layer(
+                planning_model, "ELEVATED", (237, 0, 194, 255))
+            boundary_layerIndex = rhinoutils.create_layer(
+                planning_model, "BOUNDARY", (237, 0, 194, 255), planning_layerIndex)
+            admin_layerIndex = rhinoutils.create_layer(
+                planning_model, "ADMIN", (134, 69, 255, 255), planning_layerIndex)
+            native_layerIndex = rhinoutils.create_layer(
+                planning_model, "NATIVE", (134, 69, 255, 255), planning_layerIndex)
+            zoning_layerIndex = rhinoutils.create_layer(
+                planning_model, "ZONING", (255, 180, 18, 255), planning_layerIndex)
+            hob_layerIndex = rhinoutils.create_layer(
+                planning_model, "HOB", (204, 194, 173, 255), planning_layerIndex)
+            lotsize_layerIndex = rhinoutils.create_layer(
+                planning_model, "MLS", (224, 155, 177, 255), planning_layerIndex)
+            fsr_layerIndex = rhinoutils.create_layer(
+                planning_model, "FSR", (173, 35, 204, 255), planning_layerIndex)
+            lots_layerIndex = rhinoutils.create_layer(
+                planning_model, "LOTS", (255, 106, 0, 255), planning_layerIndex)
+            road_layerIndex = rhinoutils.create_layer(
+                planning_model, "ROADS", (145, 145, 145, 255), planning_layerIndex)
+            walking_layerIndex = rhinoutils.create_layer(
+                planning_model, "WALKING", (129, 168, 0, 255), planning_layerIndex)
+            cycling_layerIndex = rhinoutils.create_layer(
+                planning_model, "CYCLING", (0, 168, 168, 255), planning_layerIndex)
+            driving_layerIndex = rhinoutils.create_layer(
+                planning_model, "DRIVING", (168, 0, 121, 255), planning_layerIndex)
+            bushfire_layerIndex = rhinoutils.create_layer(
+                planning_model, "BUSHFIRE", (176, 7, 7, 255), planning_layerIndex)
+            heritage_layerIndex = rhinoutils.create_layer(
+                planning_model, "HERITAGE", (153, 153, 153, 255), planning_layerIndex)
+            # raster_layerIndex = rhinoutils.create_layer(
+            #     planning_model, "RASTER", (0, 204, 0, 255), planning_layerIndex)
+            building_layerIndex = rhinoutils.create_layer(
+                planning_model, "BUILDINGS", (99, 99, 99, 255), geometry_layerIndex)
+            contours_layerIndex = rhinoutils.create_layer(
+                planning_model, "CONTOURS", (191, 191, 191, 255), geometry_layerIndex)
+            boundary_layerEIndex = rhinoutils.create_layer(
+                planning_model, "BOUNDARY ELEVATED", (237, 0, 194, 255), elevated_layerIndex)
+            building_layer_EIndex = rhinoutils.create_layer(
+                planning_model, "BUILDINGS ELEVATED", (99, 99, 99, 255), elevated_layerIndex)
+            topography_layerIndex = rhinoutils.create_layer(
+                planning_model, "TOPOGRAPHY", (191, 191, 191, 255), elevated_layerIndex)
+            contours_layer_EIndex = rhinoutils.create_layer(
+                planning_model, "CONTOURS ELEVATED", (191, 191, 191, 255), elevated_layerIndex)
 
-                            # Append features from the current page
-                            if "features" in data and data["features"]:
-                                all_features.extend(data["features"])
+            gh_topography_decoded = geoutils.encode_ghx_file(
+                r"./gh_scripts/topography.ghx")
+            gh_buildings_elevated_decoded = geoutils.encode_ghx_file(
+                r"./gh_scripts/elevate_buildings.ghx")
+
+            params_dict = {
+                urls.nsw_adminboundaries_url: params,
+                urls.nsw_zoning_url: params,
+                urls.nsw_hob_url: b_params,
+                urls.nsw_lotsize_url: b_params,
+                urls.nsw_fsr_url: b_params,
+                urls.nsw_lots_url: b_params,
+                urls.nsw_bushfire_url: b_params,
+                urls.nsw_heritage_url: b_params,
+                urls.nsw_topo_url: topo_params
+            }
+
+            MAX_RETRIES = 3  # Maximum retries
+            INITIAL_BACKOFF = 1  # Initial backoff in seconds
+
+            async def fetch_paginated_data(session, url, params):
+                """Fetch all paginated results from an API."""
+                all_features = []
+                while True:
+                    try:
+                        async with session.get(url, params=params, timeout=30) as response:
+                            if response.status == 200:
+                                text = await response.text()
+                                data = imports.json.loads(text)
+
+                                # Append features from the current page
+                                if "features" in data and data["features"]:
+                                    all_features.extend(data["features"])
+                                else:
+                                    break
+
+                                # Check for the next page (example with a 'next' key)
+                                next_page_url = data.get("next")
+                                if not next_page_url:
+                                    break
+
+                                # Update the URL or parameters for the next page
+                                url = next_page_url
                             else:
                                 break
+                    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                        break
+                    except Exception as e:
+                        break
 
-                            # Check for the next page (example with a 'next' key)
-                            next_page_url = data.get("next")
-                            if not next_page_url:
-                                break
+                return {"features": all_features}
 
-                            # Update the URL or parameters for the next page
-                            url = next_page_url
-                        else:
-                            break
-                except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                    break
-                except Exception as e:
-                    break
+            async def fetch_data(session, url, params, retries=MAX_RETRIES):
+                """Fetch data with retry mechanism and pagination support."""
+                attempt = 0
+                while attempt < retries:
+                    try:
+                        # Handle paginated URLs
+                        if url in [urls.nsw_lots_url, urls.nsw_zoning_url]:
+                            return await fetch_paginated_data(session, url, params)
 
-            return {"features": all_features}
+                        # Regular API fetch
+                        async with session.get(url, params=params, timeout=30) as response:
+                            if response.status == 200:
+                                text = await response.text()
+                                try:
+                                    data = imports.json.loads(text)
+                                    return data
+                                except imports.json.JSONDecodeError:
+                                    return None
+                            else:
+                                print(
+                                    f"Non-200 response ({response.status}), attempt {attempt + 1} for {url}")
+                    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                        print(
+                            f"Network error: {e}, attempt {attempt + 1} for {url}")
+                    except Exception as e:
+                        print(
+                            f"Unexpected error: {e}, attempt {attempt + 1} for {url}")
 
-        async def fetch_data(session, url, params, retries=MAX_RETRIES):
-            """Fetch data with retry mechanism and pagination support."""
-            attempt = 0
-            while attempt < retries:
-                try:
-                    # Handle paginated URLs
-                    if url in [urls.nsw_lots_url, urls.nsw_zoning_url]:
-                        return await fetch_paginated_data(session, url, params)
+                    # Increment retry count and apply exponential backoff
+                    attempt += 1
+                    backoff_time = INITIAL_BACKOFF * \
+                        (2 ** (attempt - 1)) + imports.random.uniform(0, 1)
+                    await asyncio.sleep(backoff_time)
 
-                    # Regular API fetch
-                    async with session.get(url, params=params, timeout=30) as response:
-                        if response.status == 200:
-                            text = await response.text()
-                            try:
-                                data = imports.json.loads(text)
-                                return data
-                            except imports.json.JSONDecodeError:
-                                return None
-                        else:
-                            print(
-                                f"Non-200 response ({response.status}), attempt {attempt + 1} for {url}")
-                except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                    print(
-                        f"Network error: {e}, attempt {attempt + 1} for {url}")
-                except Exception as e:
-                    print(
-                        f"Unexpected error: {e}, attempt {attempt + 1} for {url}")
+                # If all retries fail
+                return None
 
-                # Increment retry count and apply exponential backoff
-                attempt += 1
-                backoff_time = INITIAL_BACKOFF * \
-                    (2 ** (attempt - 1)) + imports.random.uniform(0, 1)
-                await asyncio.sleep(backoff_time)
+            async def fetch_all_data_with_validation(urls_dict):
+                """Fetch data from all URLs with validation and retries."""
+                async with aiohttp.ClientSession() as session:
+                    tasks = [
+                        fetch_data(session, url, params)
+                        for url, params in urls_dict.items()
+                    ]
+                    results = await asyncio.gather(*tasks)
 
-            # If all retries fail
-            return None
+                    data_dict = {}
+                    for url, result in zip(urls_dict.keys(), results):
+                        if result is not None:
+                            if url == urls.nsw_adminboundaries_url:
+                                data_dict['admin_data'] = result
+                            elif url == urls.nsw_zoning_url:
+                                data_dict['zoning_data'] = result
+                            elif url == urls.nsw_hob_url:
+                                data_dict['hob_data'] = result
+                            elif url == urls.nsw_lotsize_url:
+                                data_dict['lotsize_data'] = result
+                            elif url == urls.nsw_fsr_url:
+                                data_dict['fsr_data'] = result
+                            elif url == urls.nsw_lots_url:
+                                data_dict['lots_data'] = result
+                            elif url == urls.nsw_bushfire_url:
+                                data_dict['bushfire_data'] = result
+                            elif url == urls.nsw_heritage_url:
+                                data_dict['heritage_data'] = result
+                            elif url == urls.nsw_topo_url:
+                                data_dict['topography_data'] = result
+                    return data_dict
 
-        async def fetch_all_data_with_validation(urls_dict):
-            """Fetch data from all URLs with validation and retries."""
-            async with aiohttp.ClientSession() as session:
-                tasks = [
-                    fetch_data(session, url, params)
-                    for url, params in urls_dict.items()
-                ]
-                results = await asyncio.gather(*tasks)
+            # Data fetching
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
 
-                data_dict = {}
-                for url, result in zip(urls_dict.keys(), results):
-                    if result is not None:
-                        if url == urls.nsw_adminboundaries_url:
-                            data_dict['admin_data'] = result
-                        elif url == urls.nsw_zoning_url:
-                            data_dict['zoning_data'] = result
-                        elif url == urls.nsw_hob_url:
-                            data_dict['hob_data'] = result
-                        elif url == urls.nsw_lotsize_url:
-                            data_dict['lotsize_data'] = result
-                        elif url == urls.nsw_fsr_url:
-                            data_dict['fsr_data'] = result
-                        elif url == urls.nsw_lots_url:
-                            data_dict['lots_data'] = result
-                        elif url == urls.nsw_bushfire_url:
-                            data_dict['bushfire_data'] = result
-                        elif url == urls.nsw_heritage_url:
-                            data_dict['heritage_data'] = result
-                        elif url == urls.nsw_topo_url:
-                            data_dict['topography_data'] = result
-                return data_dict
+            # Replace `params_dict` with your actual parameters dictionary
+            data_dict = loop.run_until_complete(
+                fetch_all_data_with_validation(params_dict))
 
-        # Data fetching
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            admin_data = data_dict.get('admin_data')
+            zoning_data = data_dict.get('zoning_data')
+            hob_data = data_dict.get('hob_data')
+            lotsize_data = data_dict.get('lotsize_data')
+            fsr_data = data_dict.get('fsr_data')
+            lots_data = data_dict.get('lots_data')
+            bushfire_data = data_dict.get('bushfire_data')
+            heritage_data = data_dict.get('heritage_data')
+            topography_data = data_dict.get('topography_data')
 
-        # Replace `params_dict` with your actual parameters dictionary
-        data_dict = loop.run_until_complete(
-            fetch_all_data_with_validation(params_dict))
+            # BOUNDARY
+            boundary_data = datafetcher.get_data(
+                urls.nsw_boundary_url, boundary_params)
+            bound_curve = rhinoutils.add_boundary(
+                boundary_data, boundary_layerIndex, address, planning_model)
 
-        admin_data = data_dict.get('admin_data')
-        zoning_data = data_dict.get('zoning_data')
-        hob_data = data_dict.get('hob_data')
-        lotsize_data = data_dict.get('lotsize_data')
-        fsr_data = data_dict.get('fsr_data')
-        lots_data = data_dict.get('lots_data')
-        bushfire_data = data_dict.get('bushfire_data')
-        heritage_data = data_dict.get('heritage_data')
-        topography_data = data_dict.get('topography_data')
+            # LOTS
+            rhinoutils.add_to_model(lots_data, lots_layerIndex,
+                                    'plannumber', planning_model)
 
-        # BOUNDARY
-        boundary_data = datafetcher.get_data(
-            urls.nsw_boundary_url, boundary_params)
-        bound_curve = rhinoutils.add_boundary(
-            boundary_data, boundary_layerIndex, address, planning_model)
+            # HERITAGE
+            rhinoutils.add_to_model(
+                heritage_data, heritage_layerIndex, 'H_NAME', planning_model)
 
-        # LOTS
-        rhinoutils.add_to_model(lots_data, lots_layerIndex,
-                                'plannumber', planning_model)
+            # ADMIN
+            rhinoutils.add_to_model(admin_data, admin_layerIndex,
+                                    'suburbname', planning_model)
 
-        # HERITAGE
-        rhinoutils.add_to_model(
-            heritage_data, heritage_layerIndex, 'H_NAME', planning_model)
+            # Then the original call
+            rhinoutils.curve_to_surface(zoning_data, zoning_layerIndex,
+                                        'SYM_CODE', 'SYM_CODE', planning_model, dicts.nsw_zoning_dict)
 
-        # ADMIN
-        rhinoutils.add_to_model(admin_data, admin_layerIndex,
-                                'suburbname', planning_model)
+            # MLS
+            rhinoutils.curve_to_surface(
+                lotsize_data, lotsize_layerIndex, 'SYM_CODE', 'LOT_SIZE', planning_model, dicts.nsw_mls_dict)
 
-        # Then the original call
-        rhinoutils.curve_to_surface(zoning_data, zoning_layerIndex,
-                                    'SYM_CODE', 'SYM_CODE', planning_model, dicts.nsw_zoning_dict)
+            # FSR
+            rhinoutils.curve_to_surface(
+                fsr_data, fsr_layerIndex, 'SYM_CODE', 'FSR', planning_model, dicts.nsw_fsr_dict)
 
-        # MLS
-        rhinoutils.curve_to_surface(
-            lotsize_data, lotsize_layerIndex, 'SYM_CODE', 'LOT_SIZE', planning_model, dicts.nsw_mls_dict)
+            # HOB
+            rhinoutils.curve_to_surface(
+                hob_data, hob_layerIndex, 'SYM_CODE', 'MAX_B_H', planning_model, dicts.nsw_hob_dict)
 
-        # FSR
-        rhinoutils.curve_to_surface(
-            fsr_data, fsr_layerIndex, 'SYM_CODE', 'FSR', planning_model, dicts.nsw_fsr_dict)
+            # Bushfire
+            rhinoutils.curve_to_surface(bushfire_data, bushfire_layerIndex,
+                                        'Category', 'd_Category', planning_model, dicts.nsw_bushfire_dict)
 
-        # HOB
-        rhinoutils.curve_to_surface(
-            hob_data, hob_layerIndex, 'SYM_CODE', 'MAX_B_H', planning_model, dicts.nsw_hob_dict)
+            # Native
+            rhinoutils.add_native(urls.native_url, native_post, native_layerIndex,
+                                  planning_model, transformer=globals_var.transformer2)
 
-        # Bushfire
-        rhinoutils.curve_to_surface(bushfire_data, bushfire_layerIndex,
-                                    'Category', 'd_Category', planning_model, dicts.nsw_bushfire_dict)
+            # Roads
+            rhinoutils.add_roads_to_model(
+                tiles, zoom, road_layerIndex, planning_model, transformer=globals_var.transformer2)
 
-        # Native
-        rhinoutils.add_native(urls.native_url, native_post, native_layerIndex,
-                              planning_model, transformer=globals_var.transformer2)
+            # Isochrone processing
+            longitude_iso = lon
+            latitude_iso = lat
 
-        # Roads
-        rhinoutils.add_roads_to_model(
-            tiles, zoom, road_layerIndex, planning_model, transformer=globals_var.transformer2)
+            iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals_var.mapbox_access_token}'
+            iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals_var.mapbox_access_token}'
+            iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals_var.mapbox_access_token}'
 
-        # Isochrone processing
-        longitude_iso = lon
-        latitude_iso = lat
+            iso_response_w = imports.requests.get(iso_url_w)
+            walking_data = imports.json.loads(iso_response_w.content.decode())
 
-        iso_url_w = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile1}/{longitude_iso}, {latitude_iso}?contours_minutes=5&polygons=true&access_token={globals_var.mapbox_access_token}'
-        iso_url_c = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile2}/{longitude_iso}, {latitude_iso}?contours_minutes=10&polygons=true&access_token={globals_var.mapbox_access_token}'
-        iso_url_d = f'https://api.mapbox.com/isochrone/v1/{globals_var.profile3}/{longitude_iso}, {latitude_iso}?contours_minutes=15&polygons=true&access_token={globals_var.mapbox_access_token}'
+            iso_response_c = imports.requests.get(iso_url_c)
+            cycling_data = imports.json.loads(iso_response_c.content.decode())
 
-        iso_response_w = imports.requests.get(iso_url_w)
-        walking_data = imports.json.loads(iso_response_w.content.decode())
+            iso_response_d = imports.requests.get(iso_url_d)
+            driving_data = imports.json.loads(iso_response_d.content.decode())
 
-        iso_response_c = imports.requests.get(iso_url_c)
-        cycling_data = imports.json.loads(iso_response_c.content.decode())
+            # Walking Curves
+            rhinoutils.add_isochrone_to_model(
+                walking_data, walking_layerIndex, planning_model, transformer=globals_var.transformer2)
 
-        iso_response_d = imports.requests.get(iso_url_d)
-        driving_data = imports.json.loads(iso_response_d.content.decode())
+            # Cycling Curves
+            rhinoutils.add_isochrone_to_model(
+                cycling_data, cycling_layerIndex, planning_model, transformer=globals_var.transformer2)
 
-        # Walking Curves
-        rhinoutils.add_isochrone_to_model(
-            walking_data, walking_layerIndex, planning_model, transformer=globals_var.transformer2)
+            # Driving Curves
+            rhinoutils.add_isochrone_to_model(
+                driving_data, driving_layerIndex, planning_model, transformer=globals_var.transformer2)
 
-        # Cycling Curves
-        rhinoutils.add_isochrone_to_model(
-            cycling_data, cycling_layerIndex, planning_model, transformer=globals_var.transformer2)
+            # ras_tiles = list(imports.mercantile.tiles(ras_xmin_LL, ras_ymin_LL,
+            #                                           ras_xmax_LL, ras_ymax_LL, zooms=16))
 
-        # Driving Curves
-        rhinoutils.add_isochrone_to_model(
-            driving_data, driving_layerIndex, planning_model, transformer=globals_var.transformer2)
+            # rhinoutils.add_raster(ras_tiles, zoom, gh_raster_decoded,
+            #                       raster_layerIndex, planning_model, transformer=globals_var.transformer2)
 
-        # ras_tiles = list(imports.mercantile.tiles(ras_xmin_LL, ras_ymin_LL,
-        #                                           ras_xmax_LL, ras_ymax_LL, zooms=16))
+            # buildings
+            mapboxfetcher.mapbox_buildings(
+                tiles, zoom, building_layerIndex, planning_model, transformer=globals_var.transformer2)
 
-        # rhinoutils.add_raster(ras_tiles, zoom, gh_raster_decoded,
-        #                       raster_layerIndex, planning_model, transformer=globals_var.transformer2)
+            # topography
+            rhinoutils.add_contours(
+                topography_data, contours_layerIndex, planning_model, 'elevation')
 
-        # buildings
-        mapboxfetcher.mapbox_buildings(
-            tiles, zoom, building_layerIndex, planning_model, transformer=globals_var.transformer2)
+            # giraffe
+            if 'giraffeInput' in request.files:
+                giraffe_file = request.files['giraffeInput']
+                rhinoutils.giraffe(giraffe_file, planning_model,
+                                   transformer=globals_var.transformer2)
+            else:
+                pass
 
-        # topography
-        rhinoutils.add_contours(
-            topography_data, contours_layerIndex, planning_model, 'elevation')
+            mesh_geo_list = mapboxfetcher.mapbox_topo(topography_data, 'elevation', contours_layer_EIndex,
+                                                      planning_model, globals_var.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
 
-        # giraffe
-        if 'giraffeInput' in request.files:
-            giraffe_file = request.files['giraffeInput']
-            rhinoutils.giraffe(giraffe_file, planning_model,
-                               transformer=globals_var.transformer2)
-        else:
-            pass
+            mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex,
+                                          bound_curve, gh_buildings_elevated_decoded, planning_model, globals_var.transformer2, mesh_geo_list)
 
-        mesh_geo_list = mapboxfetcher.mapbox_topo(topography_data, 'elevation', contours_layer_EIndex,
-                                                  planning_model, globals_var.transformer2, lon, lat, gh_topography_decoded, topography_layerIndex)
+            cen_x, cen_y = globals_var.transformer2.transform(lon, lat)
+            centroid = imports.rh.Point3d(cen_x, cen_y, 0)
 
-        mapboxfetcher.mapbox_elevated(tiles, zoom, building_layer_EIndex, boundary_layerEIndex,
-                                      bound_curve, gh_buildings_elevated_decoded, planning_model, globals_var.transformer2, mesh_geo_list)
+            translation_vector = imports.rh.Vector3d(
+                -centroid.X, -centroid.Y, -centroid.Z)
 
-        cen_x, cen_y = globals_var.transformer2.transform(lon, lat)
-        centroid = imports.rh.Point3d(cen_x, cen_y, 0)
+            for obj in planning_model.Objects:
+                if obj.Geometry != bound_curve and obj.Geometry is not None:
+                    obj.Geometry.Translate(translation_vector)
 
-        translation_vector = imports.rh.Vector3d(
-            -centroid.X, -centroid.Y, -centroid.Z)
+            filename = "planning.3dm"
+            file_path = imports.os.path.abspath(
+                imports.os.path.join('tmp', 'files', filename))
+            planning_model.Write(file_path, 7)
 
-        for obj in planning_model.Objects:
-            if obj.Geometry != bound_curve and obj.Geometry is not None:
-                obj.Geometry.Translate(translation_vector)
-
-        filename = "planning.3dm"
-        file_path = imports.os.path.abspath(
-            imports.os.path.join('tmp', 'files', filename))
-        planning_model.Write(file_path, 7)
-
-        return send_file(file_path, as_attachment=True)
+            return send_file(file_path, as_attachment=True)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
     @application.route('/qld_planning', methods=['GET', 'POST'])
     def qld_planning():
