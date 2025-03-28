@@ -68,7 +68,7 @@ class ComputeAPI:
                 error_message = str(e)
 
         # If we've exhausted all retries, return an error response
-        return imports.jsonify(error=error_message), 500
+        return {"error": str(error_message)}, 500
 
 
 class MapboxFetcher:
