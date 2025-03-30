@@ -298,68 +298,79 @@ body {
   left: auto;
   text-align: left;
 }
-
-.states {
-  width: 500px;
-  height: 75px;
-  background-color: var(--black-400);
+.states-bar {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  border-radius: 10px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  top: 10px;
+  right: 270px; /* shift it left from top-right */
+  background-color: var(--black-400); /* match sidebar */
+  padding: 10px 20px;
+  border-radius: 12px;
+  z-index: 10;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
+  min-width: 240px; /* wider bar */
 }
 
-.states ul {
+.states-bar ul {
+  margin: 0;
+  padding: 0;
   list-style: none;
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  gap: 20px;
 }
 
-.states ul li img {
-  width: 50px;
-  margin: 20px;
-  margin-bottom: 5px;
-  filter: brightness(0) invert(1);
-}
-
-.states ul li {
+.states-bar ul li {
   position: relative;
 }
 
-.states ul li .text {
+.states-bar ul li img {
+  width: 36px;  /* bigger icons */
+  height: auto;
+  filter: brightness(0) invert(1); /* force white icons */
+  transition: transform 0.2s;
+}
+
+.states-bar ul li img:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+/* Tooltip styling (custom pop-up below icon) */
+.states-bar ul li .tooltip-text {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
-  opacity: 0;
-  visibility: hidden;
   background-color: var(--black-400);
   color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: opacity 0.3s, visibility 0.3s;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 20;
 }
 
-.states ul li .text::after {
+.states-bar ul li .tooltip-text::after {
   content: "";
   position: absolute;
-  top: -8px;
+  top: -6px;
   left: 50%;
   transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent var(--black-400) transparent;
 }
 
-.states ul li:hover .text {
+.states-bar ul li:hover .tooltip-text {
   opacity: 1;
   visibility: visible;
+  transform: translateX(-50%) translateY(2px); /* smooth pop-up */
 }
+
 
 .hidden {
   display: none;
