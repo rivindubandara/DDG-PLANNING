@@ -2,15 +2,17 @@
 content %}
 
 <div class="container">
+  <div class="logo-container">
+    <a href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='images/dd_logo.png') }}" alt="Digital Design Logo" />
+    </a>
+    <a href="https://www.nettletontribe.com.au/" target="_blank">
+      <img src="{{ url_for('static', filename='images/nt_logo.png') }}" alt="Nettleton Tribe Logo" />
+    </a>
+  </div>
+
+  <div class="marker-info-box" id="marker-info-box"></div>
   <div class="sidebar active">
-    <div class="menu-btn">
-      <i class="ph ph-caret-left"></i>
-    </div>
-    <div class="logo">
-      <a href="{{ url_for('index') }}"
-        ><img src="../static/images/dd_logo.png" alt=""
-      /></a>
-    </div>
     <div style="flex: 1"></div>
     <div class="menu">
       <p class="title">Model</p>
@@ -208,20 +210,21 @@ content %}
             <span class="text">PROPERTY REPORT</span>
           </a>
         </li>
+        <li id="projects-toggle">
+          <a href="#">
+            <i class="icon ph ph-folder"></i>
+            <span class="text">PROJECTS</span>
+          </a>
+        </li>
       </ul>
     </div>
     <div style="flex: 1"></div>
-    <div class="head">
-      <div class="logo">
-        <a href="https://www.nettletontribe.com.au/"
-          ><img src="../static/images/nt_logo.png" alt=""
-        /></a>
-      </div>
-    </div>
   </div>
 </div>
 
 <script>
+  let markersOn = false;
+  let markersArray = [];
   mapboxgl.accessToken =
     "pk.eyJ1Ijoicml2aW5kdWIiLCJhIjoiY2xmYThkcXNjMHRkdDQzcGU4Mmh2a3Q3MSJ9.dXlhamKyYyGusL3PWqDD9Q";
   var lat = "{{ lat }}";
@@ -237,6 +240,100 @@ content %}
       },
     },
   });
+  // Helper: Create a blue circle marker (without built-in popup)
+  function createBlueMarker(lngLat) {
+    const el = document.createElement("div");
+    el.style.width = "20px";
+    el.style.height = "20px";
+    el.style.backgroundColor = "#0000FF";
+    el.style.borderRadius = "50%";
+    el.style.border = "2px solid #fff";
+    el.style.boxShadow = "0 0 2px rgba(0,0,0,0.5)";
+    el.style.cursor = "pointer";
+    return new mapboxgl.Marker({ element: el }).setLngLat(lngLat);
+  }
+
+  // Load projects markers from the external JSON file
+  fetch("{{ url_for('static', filename='SydProjects.json') }}")
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((record) => {
+        const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          record.location
+        )}.json?access_token=${mapboxgl.accessToken}`;
+        fetch(geocodeUrl)
+          .then((response) => response.json())
+          .then((geoData) => {
+            if (geoData.features && geoData.features.length > 0) {
+              const coords = geoData.features[0].center;
+              const marker = createBlueMarker(coords);
+              // DO NOT add to map by default (markers off)
+              markersArray.push(marker);
+              // Attach click event to update marker info box
+              marker.getElement().addEventListener("click", (e) => {
+                e.stopPropagation();
+                const markerInfoBox =
+                  document.getElementById("marker-info-box");
+                markerInfoBox.style.display = "block";
+                markerInfoBox.style.zIndex = "10000";
+                markerInfoBox.innerHTML = `
+                  <div style="padding: 5px; color: #fff; font-size: 13px;">
+                    <h4 style="margin:0 0 8px; font-size: 15px;"><strong>PROJECT INFORMATION</strong></h4>
+                    <h3 style="margin:0 0 8px; font-size: 14px;">${
+                      record.name || "No Title"
+                    }</h3>
+                    <p style="margin:0 0 2px;"><strong>Address:</strong> ${
+                      record.location || "No Address"
+                    }</p>
+                    <p style="margin:0 0 2px;"><strong>Status:</strong> ${
+                      record.projectStatus || "No details provided."
+                    }</p>
+                    <p style="margin:0 0 2px;"><strong>Director:</strong> ${
+                      record.Director || "No details provided."
+                    }</p>
+                    <p style="margin:0 0 2px;"><strong>Client:</strong> ${
+                      record.clientName || "No details provided."
+                    }</p>
+                    <p style="margin:0 0 2px;"><strong>Sector:</strong> ${
+                      record.Sector || "No details provided."
+                    }</p>
+                    <p style="margin:0;"><strong>Type of Work:</strong> ${
+                      record["Type of Work"] || "No details provided."
+                    }</p>
+                  </div>
+                `;
+              });
+            } else {
+              console.warn("No geocoding results for", record.location);
+            }
+          })
+          .catch((err) =>
+            console.error("Geocoding error for", record.location, err)
+          );
+      });
+    })
+    .catch((err) => console.error("Error loading JSON file:", err));
+
+  // Toggle projects markers on and off
+  function toggleProjectsMarkers() {
+    if (markersOn) {
+      markersArray.forEach((marker) => marker.remove());
+      markersOn = false;
+      document.querySelector("#projects-toggle .text").textContent = "PROJECTS";
+    } else {
+      markersArray.forEach((marker) => marker.addTo(map));
+      markersOn = true;
+      document.querySelector("#projects-toggle .text").textContent = "PROJECTS";
+    }
+  }
+
+  // Add event listener to the projects icon
+  document
+    .getElementById("projects-toggle")
+    .addEventListener("click", function (e) {
+      e.preventDefault();
+      toggleProjectsMarkers();
+    });
 
   document
     .querySelector('li[data-layer-id="building-layer"] a')
@@ -580,12 +677,12 @@ content %}
               <h4>Zoning Controls</h4>
               <p><em>Loading zoning data...</em></p>
             </div>
-            
+
             <div class="info-section" id="development-section">
               <h4>Development Controls</h4>
               <p><em>Loading development controls...</em></p>
             </div>
-            
+
             <div class="info-section" id="location-section">
               <h4>Location</h4>
               <p><strong>Latitude:</strong> ${coordinates.lat.toFixed(6)}</p>

@@ -85,21 +85,6 @@ body {
   border-radius: 3px;
 }
 
-.head {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  margin-top: auto;
-}
-
-.logo {
-  overflow: hidden;
-}
-
-.logo img {
-  width: 200px;
-}
-
 .menu .title {
   font-size: 10px;
   font-weight: 500;
@@ -205,10 +190,6 @@ body {
 
 .sidebar.active .menu-btn i {
   transform: rotate(180deg);
-}
-
-.sidebar.active .logo {
-  display: none;
 }
 
 .sidebar.active .menu .title {
@@ -325,7 +306,7 @@ body {
 }
 
 .states-bar ul li img {
-  width: 36px;  /* bigger icons */
+  width: 36px; /* bigger icons */
   height: auto;
   filter: brightness(0) invert(1); /* force white icons */
   transition: transform 0.2s;
@@ -370,7 +351,6 @@ body {
   visibility: visible;
   transform: translateX(-50%) translateY(2px); /* smooth pop-up */
 }
-
 
 .hidden {
   display: none;
@@ -1034,3 +1014,37 @@ body {
 .sub-menu li a {
   width: auto !important;
 }
+
+.marker-info-box {
+  position: absolute;
+  top: 200px;
+  right: 20px;
+  width: 300px;
+  height: 250px;
+  color: white;
+  background: var(--black-400);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: none;
+}
+
+.logo-container {
+  position: absolute;
+  bottom: 10px;     
+  right: 10px;    
+  display: flex;  
+  align-items: center;
+  gap: 20px;     
+  z-index: 1000;  
+}
+
+.logo-container img {
+  width: 150px;   
+  display: block;
+}
+
+.logo-container a {
+  text-decoration: none;
+} 

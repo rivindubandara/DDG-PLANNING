@@ -2,15 +2,23 @@
 content %}
 
 <div class="container">
+  <div class="logo-container">
+    <a href="{{ url_for('index') }}">
+      <img
+        src="{{ url_for('static', filename='images/dd_logo.png') }}"
+        alt="Digital Design Logo"
+      />
+    </a>
+    <a href="https://www.nettletontribe.com.au/" target="_blank">
+      <img
+        src="{{ url_for('static', filename='images/nt_logo.png') }}"
+        alt="Nettleton Tribe Logo"
+      />
+    </a>
+  </div>
+
+  <div class="marker-info-box" id="marker-info-box"></div>
   <div class="sidebar active">
-    <div class="menu-btn">
-      <i class="ph ph-caret-left"></i>
-    </div>
-    <div class="logo">
-      <a href="https://digitaldesign.nettletontribe.com.au/"
-        ><img src="../static/images/dd_logo.png" alt=""
-      /></a>
-    </div>
     <div style="flex: 1"></div>
     <div class="menu">
       <p class="title">MODEL</p>
@@ -142,13 +150,6 @@ content %}
       </ul>
     </div>
     <div style="flex: 1"></div>
-    <div class="head">
-      <div class="logo">
-        <a href="https://www.nettletontribe.com.au/"
-          ><img src="../static/images/nt_logo.png" alt=""
-        /></a>
-      </div>
-    </div>
   </div>
 </div>
 
