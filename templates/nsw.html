@@ -4,14 +4,83 @@ content %}
 <div class="container">
   <div class="logo-container">
     <a href="{{ url_for('index') }}">
-      <img src="{{ url_for('static', filename='images/dd_logo.png') }}" alt="Digital Design Logo" />
+      <img
+        src="{{ url_for('static', filename='images/dd_logo.png') }}"
+        alt="Digital Design Logo"
+      />
     </a>
     <a href="https://www.nettletontribe.com.au/" target="_blank">
-      <img src="{{ url_for('static', filename='images/nt_logo.png') }}" alt="Nettleton Tribe Logo" />
+      <img
+        src="{{ url_for('static', filename='images/nt_logo.png') }}"
+        alt="Nettleton Tribe Logo"
+      />
     </a>
   </div>
 
-  <div class="marker-info-box" id="marker-info-box"></div>
+  <div id="marker-info-box" class="marker-info-box" style="display: none">
+    <!-- Project Information Box -->
+    <div id="project-details">
+      <!-- Project details will be dynamically inserted here -->
+      <h4><strong>PROJECT INFORMATION</strong></h4>
+      <p>No project selected.</p>
+    </div>
+    <!-- Filter Box (separate container below project info) -->
+    <div id="filter-container" class="filter-container">
+      <label for="sector-filter">Sector:</label>
+      <select id="sector-filter">
+        <option value="">All</option>
+        <option value="Adaptive Reuse">Adaptive Reuse</option>
+        <option value="Aged Care">Aged Care</option>
+        <option value="Build to Rent">Build to Rent</option>
+        <option value="Car Park">Car Park</option>
+        <option value="Commercial">Commercial</option>
+        <option value="Education">Education</option>
+        <option value="Health and Research">Health and Research</option>
+        <option value="Hospitality">Hospitality</option>
+        <option value="Industrial">Industrial</option>
+        <option value="Interiors">Interiors</option>
+        <option value="Master Planning">Master Planning</option>
+        <option value="Mixed Use">Mixed Use</option>
+        <option value="Residential">Residential</option>
+        <option value="Retail">Retail</option>
+        <option value="Student Accommodation">Student Accommodation</option>
+      </select>
+      <br />
+      <label for="status-filter">Status:</label>
+      <select id="status-filter">
+        <option value="">All</option>
+        <option value="Active">Active</option>
+        <option value="Completed">Completed</option>
+        <option value="Opportunity">Opportunity</option>
+        <option value="Lost">Lost</option>
+        <option value="Mixed">Mixed</option>
+      </select>
+    </div>
+    
+    <div id="legend-container" class="legend-container">
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #00ff00"></span>
+        <span>Active</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #ffff00"></span>
+        <span>Opportunity</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #ff0000"></span>
+        <span>Lost</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #0000ff"></span>
+        <span>Completed</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #ff00ff"></span>
+        <span>Mixed</span>
+      </div>
+    </div>
+  </div>
+
   <div class="sidebar active">
     <div style="flex: 1"></div>
     <div class="menu">
@@ -223,8 +292,6 @@ content %}
 </div>
 
 <script>
-  let markersOn = false;
-  let markersArray = [];
   mapboxgl.accessToken =
     "pk.eyJ1Ijoicml2aW5kdWIiLCJhIjoiY2xmYThkcXNjMHRkdDQzcGU4Mmh2a3Q3MSJ9.dXlhamKyYyGusL3PWqDD9Q";
   var lat = "{{ lat }}";
@@ -240,12 +307,24 @@ content %}
       },
     },
   });
-  // Helper: Create a blue circle marker (without built-in popup)
-  function createBlueMarker(lngLat) {
+  // Global variables for projects markers (off by default)
+  let markersOn = false;
+  let markersArray = [];
+
+  const statusColorMap = {
+    Active: "#00FF00", // green
+    Opportunity: "#FFFF00", // yellow
+    Lost: "#FF0000", // red
+    Completed: "#0000FF", // blue
+    Dormant: "#FFA500", // orange
+    Mixed: "#FF00FF", // magenta
+  };
+
+  function createColoredMarker(lngLat, color = "#FFD700") {
     const el = document.createElement("div");
     el.style.width = "20px";
     el.style.height = "20px";
-    el.style.backgroundColor = "#0000FF";
+    el.style.backgroundColor = color; // dynamic color
     el.style.borderRadius = "50%";
     el.style.border = "2px solid #fff";
     el.style.boxShadow = "0 0 2px rgba(0,0,0,0.5)";
@@ -253,7 +332,63 @@ content %}
     return new mapboxgl.Marker({ element: el }).setLngLat(lngLat);
   }
 
-  // Load projects markers from the external JSON file
+  // Function to apply filters to markers
+  function applyFilter() {
+    const sectorFilter = document.getElementById("sector-filter").value;
+    const statusFilter = document.getElementById("status-filter").value;
+    markersArray.forEach((item) => {
+      const record = item.data;
+      const marker = item.marker;
+      let show = true;
+      if (sectorFilter && record.Sector !== sectorFilter) {
+        show = false;
+      }
+      if (statusFilter && record.projectStatus !== statusFilter) {
+        show = false;
+      }
+      if (show) {
+        marker.addTo(map);
+      } else {
+        marker.remove();
+      }
+    });
+  }
+
+  // Toggle projects markers on and off (markers off by default)
+  function toggleProjectsMarkers() {
+    if (markersOn) {
+      markersArray.forEach((item) => item.marker.remove());
+      markersOn = false;
+      document.querySelector("#projects-toggle .text").textContent =
+        "PROJECTS OFF";
+    } else {
+      markersOn = true;
+      document.querySelector("#projects-toggle .text").textContent =
+        "PROJECTS ON";
+      applyFilter();
+    }
+  }
+
+  document
+    .getElementById("projects-toggle")
+    .addEventListener("click", function (e) {
+      e.preventDefault();
+      toggleProjectsMarkers();
+    });
+
+  // When filter values change, update markers if they are on
+  document.getElementById("sector-filter").addEventListener("change", () => {
+    if (markersOn) {
+      applyFilter();
+    }
+  });
+  document.getElementById("status-filter").addEventListener("change", () => {
+    if (markersOn) {
+      applyFilter();
+    }
+  });
+
+  // Load projects markers from external JSON file
   fetch("{{ url_for('static', filename='SydProjects.json') }}")
     .then((response) => response.json())
     .then((data) => {
@@ -266,42 +401,48 @@ content %}
           .then((geoData) => {
             if (geoData.features && geoData.features.length > 0) {
               const coords = geoData.features[0].center;
-              const marker = createBlueMarker(coords);
-              // DO NOT add to map by default (markers off)
-              markersArray.push(marker);
-              // Attach click event to update marker info box
+
+              // 1) Lookup color based on status
+              const color = statusColorMap[record.projectStatus] || "#FFD700";
+
+              // 2) Create a colored marker
+              const marker = createColoredMarker(coords, color);
+
+              // 3) Store in markersArray but do not add to map if your toggle is off
+              markersArray.push({ marker, data: record });
+
+              // 4) Attach click handler
               marker.getElement().addEventListener("click", (e) => {
                 e.stopPropagation();
                 const markerInfoBox =
                   document.getElementById("marker-info-box");
                 markerInfoBox.style.display = "block";
                 markerInfoBox.style.zIndex = "10000";
-                markerInfoBox.innerHTML = `
-                  <div style="padding: 5px; color: #fff; font-size: 13px;">
-                    <h4 style="margin:0 0 8px; font-size: 15px;"><strong>PROJECT INFORMATION</strong></h4>
-                    <h3 style="margin:0 0 8px; font-size: 14px;">${
-                      record.name || "No Title"
-                    }</h3>
-                    <p style="margin:0 0 2px;"><strong>Address:</strong> ${
-                      record.location || "No Address"
-                    }</p>
-                    <p style="margin:0 0 2px;"><strong>Status:</strong> ${
-                      record.projectStatus || "No details provided."
-                    }</p>
-                    <p style="margin:0 0 2px;"><strong>Director:</strong> ${
-                      record.Director || "No details provided."
-                    }</p>
-                    <p style="margin:0 0 2px;"><strong>Client:</strong> ${
-                      record.clientName || "No details provided."
-                    }</p>
-                    <p style="margin:0 0 2px;"><strong>Sector:</strong> ${
-                      record.Sector || "No details provided."
-                    }</p>
-                    <p style="margin:0;"><strong>Type of Work:</strong> ${
-                      record["Type of Work"] || "No details provided."
-                    }</p>
-                  </div>
-                `;
+                // Update the project details part inside the marker info box
+                document.getElementById("project-details").innerHTML = `
+                <div>
+                  <h4><strong>PROJECT INFORMATION</strong></h4>
+                  <h3>${record.name || "No Title"}</h3>
+                  <p><strong>Address:</strong> ${
+                    record.location || "No Address"
+                  }</p>
+                  <p><strong>Status:</strong> ${
+                    record.projectStatus || "No details provided."
+                  }</p>
+                  <p><strong>Director:</strong> ${
+                    record.Director || "No details provided."
+                  }</p>
+                  <p><strong>Client:</strong> ${
+                    record.clientName || "No details provided."
+                  }</p>
+                  <p><strong>Sector:</strong> ${
+                    record.Sector || "No details provided."
+                  }</p>
+                  <p><strong>Type of Work:</strong> ${
+                    record["Type of Work"] || "No details provided."
+                  }</p>
+                </div>
+              `;
               });
             } else {
               console.warn("No geocoding results for", record.location);
@@ -313,27 +454,6 @@ content %}
       });
     })
     .catch((err) => console.error("Error loading JSON file:", err));
-
-  // Toggle projects markers on and off
-  function toggleProjectsMarkers() {
-    if (markersOn) {
-      markersArray.forEach((marker) => marker.remove());
-      markersOn = false;
-      document.querySelector("#projects-toggle .text").textContent = "PROJECTS";
-    } else {
-      markersArray.forEach((marker) => marker.addTo(map));
-      markersOn = true;
-      document.querySelector("#projects-toggle .text").textContent = "PROJECTS";
-    }
-  }
-
-  // Add event listener to the projects icon
-  document
-    .getElementById("projects-toggle")
-    .addEventListener("click", function (e) {
-      e.preventDefault();
-      toggleProjectsMarkers();
-    });
 
   document
     .querySelector('li[data-layer-id="building-layer"] a')

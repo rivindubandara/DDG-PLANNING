@@ -1014,37 +1014,117 @@ body {
 .sub-menu li a {
   width: auto !important;
 }
-
+/* Overall marker info box container */
 .marker-info-box {
   position: absolute;
-  top: 200px;
-  right: 20px;
+  top: 150px;
+  right: 10px;
   width: 300px;
-  height: 250px;
-  color: white;
-  background: var(--black-400);
-  padding: 10px;
+  background: var(--black-400); /* dark translucent background */
+  border: 1px solid #555;
   border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
-  display: none;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  color: #fff; /* white text */
+  max-height: 500px; /* limit height; scroll if necessary */
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+/* Project details box (top section) */
+#project-details {
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+#project-details h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #fff;
+}
+
+#project-details h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #fff;
+}
+
+#project-details p {
+  margin: 0;
+  font-size: 13px;
+  color: #fff;
+}
+
+/* Legend container - displays items in a row */
+#legend-container {
+  display: flex;
+  flex-wrap: wrap; /* so it can wrap if needed on small widths */
+  gap: 8px;        /* space between items */
+  margin-top: 10px;
+}
+
+/* Each legend item is horizontally aligned */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* space between color circle and label */
+  font-size: 13px;
+}
+
+/* Small colored circle for each status */
+.legend-color {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #fff; /* optional white border for contrast */
+}
+
+/* Filter container: separate box below the project info */
+.filter-container {
+  background: var(--black-400); /* same dark background */
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 10px;
+  color: #fff;
+}
+
+/* Filter container labels */
+.filter-container label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+/* Dropdown (select) styling */
+.filter-container select {
+  width: 100%;
+  padding: 4px;
+  font-size: 13px;
+  background: #333; /* dark dropdown background */
+  color: #fff; /* white text */
+  border: 1px solid #555;
+  border-radius: 4px;
+  margin-bottom: 8px;
 }
 
 .logo-container {
   position: absolute;
-  bottom: 10px;     
-  right: 10px;    
-  display: flex;  
+  bottom: 10px;
+  right: 10px;
+  display: flex;
   align-items: center;
-  gap: 20px;     
-  z-index: 1000;  
+  gap: 20px;
+  z-index: 1000;
 }
 
 .logo-container img {
-  width: 150px;   
+  width: 150px;
   display: block;
 }
 
 .logo-container a {
   text-decoration: none;
-} 
+}
