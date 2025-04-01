@@ -4,10 +4,16 @@ content %}
 <div class="container">
   <div class="logo-container">
     <a href="{{ url_for('index') }}">
-      <img src="{{ url_for('static', filename='images/dd_logo.png') }}" alt="Digital Design Logo" />
+      <img
+        src="{{ url_for('static', filename='images/dd_logo.png') }}"
+        alt="Digital Design Logo"
+      />
     </a>
     <a href="https://www.nettletontribe.com.au/" target="_blank">
-      <img src="{{ url_for('static', filename='images/nt_logo.png') }}" alt="Nettleton Tribe Logo" />
+      <img
+        src="{{ url_for('static', filename='images/nt_logo.png') }}"
+        alt="Nettleton Tribe Logo"
+      />
     </a>
   </div>
 
@@ -41,7 +47,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.1"
-                value="1"
+                value="0"
                 data-layer-id="admin-raster-layer"
               />
             </li>
@@ -55,7 +61,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.1"
-                value="1"
+                value="0"
                 data-layer-id="cadastre-raster-layer"
               />
             </li>
@@ -63,6 +69,15 @@ content %}
               <a href="#">
                 <span class="text">3D BUILDINGS</span>
               </a>
+              <input
+                type="range"
+                class="opacity-slider"
+                min="0"
+                max="1"
+                step="1"
+                value="0"
+                data-layer-id="building-layer"
+              />
             </li>
             <li data-layer-id="land-zoning-raster-layer">
               <a href="#">
@@ -74,7 +89,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.1"
-                value="1"
+                value="0"
                 data-layer-id="land-zoning-raster-layer"
               />
             </li>
@@ -88,7 +103,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.1"
-                value="1"
+                value="0"
                 data-layer-id="heritage-raster-layer"
               />
             </li>
@@ -102,7 +117,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.1"
-                value="1"
+                value="0"
                 data-layer-id="Territories"
               />
             </li>
@@ -116,7 +131,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.1"
-                value="1"
+                value="0"
                 data-layer-id="mapbox-satellite-layer"
               />
             </li>
@@ -557,6 +572,7 @@ content %}
 
   map.addControl(nav, "top-right");
 
+  // Add event listeners for all sliders
   document.querySelectorAll(".opacity-slider").forEach((slider) => {
     slider.addEventListener("mousedown", (e) => e.stopPropagation());
     slider.addEventListener("click", (e) => e.stopPropagation());
@@ -565,19 +581,36 @@ content %}
       const layerId = e.target.dataset.layerId;
       const opacity = parseFloat(e.target.value);
 
-      const layer = map.getLayer(layerId);
-      if (!layer) return;
-
-      const layerType = layer.type;
-
-      if (layerType === "raster") {
+      if (layerId === "mapbox-satellite-layer") {
+        // Special handling for satellite layer
+        if (map.getLayer(layerId)) {
+          map.setLayoutProperty(
+            layerId,
+            "visibility",
+            opacity > 0 ? "visible" : "none"
+          );
+          map.setPaintProperty(layerId, "raster-opacity", opacity);
+        }
+      } else if (layerId === "building-layer") {
+        // Special handling for 3D buildings
+        map.setConfigProperty("basemap", "show3dObjects", opacity > 0);
+      } else if (map.getLayer(layerId)) {
+        // For other raster layers
+        map.setLayoutProperty(
+          layerId,
+          "visibility",
+          opacity > 0 ? "visible" : "none"
+        );
         map.setPaintProperty(layerId, "raster-opacity", opacity);
-      } else if (layerType === "fill") {
-        map.setPaintProperty(layerId, "fill-opacity", opacity);
-      } else if (layerType === "line") {
-        map.setPaintProperty(layerId, "line-opacity", opacity);
-      } else if (layerType === "symbol") {
-        map.setPaintProperty(layerId, "text-opacity", opacity);
+
+        // Handle special cases for layers with labels
+        if (layerMapping[layerId]) {
+          map.setLayoutProperty(
+            layerMapping[layerId],
+            "visibility",
+            opacity > 0 ? "visible" : "none"
+          );
+        }
       }
     });
   });

@@ -109,7 +109,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="admin-raster-layer"
               />
@@ -123,7 +123,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="cadastre-raster-layer"
               />
@@ -135,7 +135,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="land-zoning-raster-layer"
               />
@@ -149,7 +149,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="floor-space-ratio-raster-layer"
               />
@@ -163,7 +163,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="mls-raster-layer"
               />
@@ -177,7 +177,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="hob-raster-layer"
               />
@@ -186,6 +186,15 @@ content %}
               <a href="#">
                 <span class="text">3D BUILDINGS</span>
               </a>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0"
+                class="opacity-slider"
+                data-layer-id="building-layer"
+              />
             </li>
             <li data-layer-id="bushfire-raster-layer">
               <a href="#">
@@ -196,7 +205,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="bushfire-raster-layer"
               />
@@ -210,7 +219,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="heritage-raster-layer"
               />
@@ -224,7 +233,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="Territories"
               />
@@ -238,7 +247,7 @@ content %}
                 min="0"
                 max="1"
                 step="0.01"
-                value="1"
+                value="0"
                 class="opacity-slider"
                 data-layer-id="mapbox-satellite-layer"
               />
@@ -483,6 +492,69 @@ content %}
   };
 
   map.on("load", function () {
+    // Add satellite layer first
+    map.addSource("satellite", {
+      type: "raster",
+      url: "mapbox://mapbox.satellite",
+      tileSize: 256,
+    });
+
+    map.addLayer({
+      id: "mapbox-satellite-layer",
+      type: "raster",
+      source: "satellite",
+      minzoom: 0,
+      maxzoom: 22,
+      layout: {
+        visibility: "none",
+      },
+      paint: {
+        "raster-opacity": 0,
+        "raster-emissive-strength": 1.0,
+      },
+    });
+
+    // Add event listeners for all sliders
+    document.querySelectorAll(".opacity-slider").forEach((slider) => {
+      const layerId = slider.dataset.layerId;
+
+      slider.addEventListener("input", (e) => {
+        const opacity = parseFloat(e.target.value);
+
+        if (layerId === "mapbox-satellite-layer") {
+          // Special handling for satellite layer
+          if (map.getLayer(layerId)) {
+            map.setLayoutProperty(
+              layerId,
+              "visibility",
+              opacity > 0 ? "visible" : "none"
+            );
+            map.setPaintProperty(layerId, "raster-opacity", opacity);
+          }
+        } else if (layerId === "building-layer") {
+          // Special handling for 3D buildings
+          map.setConfigProperty("basemap", "show3dObjects", opacity > 0);
+        } else if (map.getLayer(layerId)) {
+          // For other raster layers
+          map.setLayoutProperty(
+            layerId,
+            "visibility",
+            opacity > 0 ? "visible" : "none"
+          );
+          map.setPaintProperty(layerId, "raster-opacity", opacity);
+
+          // Handle special cases for layers with labels
+          if (layerMapping[layerId]) {
+            map.setLayoutProperty(
+              layerMapping[layerId],
+              "visibility",
+              opacity > 0 ? "visible" : "none"
+            );
+          }
+        }
+      });
+    });
+
     map.addSource("cadastre-raster-tiles", {
       type: "raster",
       tiles: [
@@ -502,25 +574,7 @@ content %}
         visibility: "none",
       },
       paint: {
-        "raster-emissive-strength": 1.0,
-      },
-    });
-
-    map.addSource("mapbox-satellite", {
-      type: "raster",
-      url: "mapbox://mapbox.satellite",
-      tileSize: 256,
-    });
-
-    map.addLayer({
-      id: "mapbox-satellite-layer",
-      type: "raster",
-      slot: "middle",
-      source: "mapbox-satellite",
-      layout: {
-        visibility: "none",
-      },
-      paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -544,6 +598,7 @@ content %}
         visibility: "none",
       },
       paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -567,6 +622,7 @@ content %}
         visibility: "none",
       },
       paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -590,6 +646,7 @@ content %}
         visibility: "none",
       },
       paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -613,6 +670,7 @@ content %}
         visibility: "none",
       },
       paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -636,6 +694,7 @@ content %}
         visibility: "none",
       },
       paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -659,6 +718,7 @@ content %}
         visibility: "none",
       },
       paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -682,6 +742,7 @@ content %}
         visibility: "none",
       },
       paint: {
+        "raster-opacity": 0,
         "raster-emissive-strength": 1.0,
       },
     });
@@ -699,7 +760,7 @@ content %}
       "source-layer": "Territories",
       paint: {
         "fill-color": ["get", "color"],
-        "fill-opacity": 1,
+        "fill-opacity": 0,
         "fill-emissive-strength": 1,
       },
       minzoom: 0,

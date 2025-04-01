@@ -90,29 +90,29 @@ body {
   font-weight: 500;
   color: white;
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 
 .menu ul li {
   position: relative;
   list-style: none;
-  margin-bottom: 5px;
+  margin-bottom: 1px;
 }
 
-.menu ul li a {
+.menu ul li > a {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 6px;
   font-size: 14px;
   font-weight: 500;
   color: white;
   text-decoration: none;
-  padding: 12px;
+  padding: 4px 8px;
   border-radius: 8px;
   transition: all 0.3s;
   min-width: 45px;
-  min-height: 45px;
+  min-height: 28px;
 }
 
 .menu ul li > a:hover,
@@ -143,20 +143,31 @@ body {
 
 .menu .sub-menu {
   display: none;
-  margin-left: 20px;
-  padding-left: 20px;
-  padding-top: 5px;
+  margin-left: 16px;
+  padding-left: 16px;
+  padding-top: 1px;
   border-left: 1px solid var(--black-400);
 }
 
+.menu .sub-menu li {
+  display: flex;
+  justify-content: flex-start;
+  padding-right: 120px;
+  position: relative;
+  margin-bottom: 1px;
+  min-height: 20px;
+}
+
 .menu .sub-menu li a {
-  padding: 10px 8px;
-  font-size: 12px;
+  justify-content: flex-start;
+  padding: 2px 8px;
+  flex: 1;
+  min-height: 20px;
 }
 
 .menu:not(:last-child) {
-  padding-bottom: 10px;
-  margin-bottom: 20px;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
   border-bottom: 2px solid var(--black-400);
 }
 
@@ -842,14 +853,34 @@ body {
 }
 
 /* Hover state for sub-menu items */
-.sub-menu li a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.sub-menu li a:hover,
+.sub-menu li a:active,
+.sub-menu li.active a,
+.sub-menu li:hover {
+  background: transparent !important;
+  color: white !important;
 }
 
-/* Ensure consistent padding for all states */
 .sub-menu li a {
-  padding: 8px 12px;
-  transition: all 0.3s ease;
+  background: transparent !important;
+}
+
+.sub-menu li a .text {
+  color: white !important;
+}
+
+/* Remove any hover backgrounds */
+.menu ul li > a:hover,
+.menu ul li.active > a,
+.menu ul li > a:active {
+  background: transparent !important;
+}
+
+/* Keep text white in all states */
+.menu ul li > a:hover .text,
+.menu ul li.active > a .text,
+.menu ul li > a:active .text {
+  color: white !important;
 }
 
 /* Add styles for the top section */
@@ -965,15 +996,28 @@ body {
 /* Fix button width and slider interaction */
 .sub-menu li {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  justify-content: flex-start;
+  padding-right: 120px;
+  position: relative;
 }
 
 .sub-menu li a {
-  display: inline-block;
-  padding: 8px 12px;
-  transition: all 0.3s ease;
-  border-radius: 8px;
+  justify-content: flex-start;
+  padding-left: 16px;
+  flex: 1;
+}
+
+.sub-menu li a .text {
+  font-size: 12px;
+  text-align: left;
+}
+
+.opacity-slider {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 70px;
 }
 
 /* Override any existing styles that might make the button full width */
@@ -989,25 +1033,52 @@ body {
 
 /* Prevent button from covering slider */
 .opacity-slider {
-  width: calc(100% - 24px);
-  margin: 0 12px 8px 12px;
+  width: 70px;
+  height: 4px;
+  margin: 0;
   cursor: pointer;
   -webkit-appearance: none;
-  height: 4px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
-  position: relative;
-  z-index: 2;
+  padding: 0;
+  justify-self: end;
+}
+
+/* Slider thumb styling */
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffd700;
+  cursor: pointer;
+  border: none;
+}
+
+.opacity-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffd700;
+  cursor: pointer;
+  border: none;
+}
+
+/* Active state for sub-menu items */
+.sub-menu li.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
 }
 
 /* Ensure proper spacing in collapsed sidebar */
 .sidebar.active .sub-menu li {
-  padding: 8px 4px;
+  padding: 4px;
+  grid-template-columns: 1fr 40px;
   gap: 5px;
 }
 
 .sidebar.active .opacity-slider {
-  margin: 0 4px 8px 4px;
+  width: 40px;
 }
 
 /* Override any other styles that might affect button width */
@@ -1242,4 +1313,15 @@ body {
 
 #projects-toggle.active a:hover .icon {
   color: black !important;
+}
+
+.sub-menu li a {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+.sub-menu li a .text {
+  text-align: left !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
 }
