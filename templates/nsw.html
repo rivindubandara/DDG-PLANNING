@@ -288,6 +288,7 @@ content %}
             <span class="text">PROPERTY REPORT</span>
           </a>
         </li>
+        <p class="title">Projects</p>
         <li id="projects-toggle">
           <a href="#">
             <i class="icon ph ph-folder"></i>
@@ -366,17 +367,29 @@ content %}
   // Toggle projects markers on and off (markers off by default)
   function toggleProjectsMarkers() {
     const projectsToggle = document.getElementById("projects-toggle");
+    const markerInfoBox = document.getElementById("marker-info-box");
+    const fixedInfoContainer = document.getElementById("fixed-info-container");
+
     if (markersOn) {
       markersArray.forEach((item) => item.marker.remove());
       markersOn = false;
       projectsToggle.classList.remove("active");
+      markerInfoBox.style.display = "none"; // Hide the project info box
+      if (fixedInfoContainer) {
+        fixedInfoContainer.style.display = "block"; // Show the site info box if it exists
+      }
     } else {
       markersOn = true;
       projectsToggle.classList.add("active");
+      markerInfoBox.style.display = "block"; // Show the project info box
+      if (fixedInfoContainer) {
+        fixedInfoContainer.style.display = "none"; // Hide the site info box
+      }
       applyFilter();
     }
   }
 
+  // Add click event listener for projects toggle
   document
     .getElementById("projects-toggle")
     .addEventListener("click", function (e) {

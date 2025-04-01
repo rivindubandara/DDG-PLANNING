@@ -317,13 +317,16 @@ content %}
   // Toggle projects markers on and off (markers off by default)
   function toggleProjectsMarkers() {
     const projectsToggle = document.getElementById("projects-toggle");
+    const markerInfoBox = document.getElementById("marker-info-box");
     if (markersOn) {
       markersArray.forEach((item) => item.marker.remove());
       markersOn = false;
       projectsToggle.classList.remove("active");
+      markerInfoBox.style.display = "none"; // Hide the info box when toggling off
     } else {
       markersOn = true;
       projectsToggle.classList.add("active");
+      markerInfoBox.style.display = "block"; // Show the info box when toggling on
       applyFilter();
     }
   }
