@@ -483,7 +483,7 @@ body {
   font-weight: 500;
   overflow: hidden;
   z-index: 10000;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .modal-header {
@@ -509,18 +509,17 @@ body {
 
 .modal-content {
   padding: 20px;
-  scrollbar-width: thin;
   background-color: var(--black-400);
   font-size: 14px;
+  overflow: hidden;
 }
 
 .modal::-webkit-scrollbar {
-  width: 8px;
+  display: none;
 }
 
 .modal::-webkit-scrollbar-thumb {
-  background-color: pink;
-  border-radius: 4px;
+  display: none;
 }
 
 .modal ul li {
