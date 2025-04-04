@@ -381,188 +381,46 @@ content %}
 
   map.addControl(geocoder, "top-right");
 
-  var marker;
-  function mapClickFn(coordinates, addressFieldId) {
-    const url =
-      "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-      coordinates.lng +
-      "," +
-      coordinates.lat +
-      ".json?access_token=" +
-      mapboxgl.accessToken +
-      "&types=address";
+  let marker = null;
 
-    // Define TAS URLs here so they're in scope
-    const zoningUrl = `https://services.thelist.tas.gov.au/arcgis/rest/services/Public/PlanningOnline/MapServer/4/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const lotsUrl = `https://services.thelist.tas.gov.au/arcgis/rest/services/Public/PlanningOnline/MapServer/2/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const heritageUrl = `https://services.thelist.tas.gov.au/arcgis/rest/services/HT/HT_Public/MapServer/0/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const adminUrl = `https://services.thelist.tas.gov.au/arcgis/rest/services/Public/CadastreAndAdministrative/MapServer/7/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+  function updateAddressBox(lngLat) {
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lngLat.lng},${lngLat.lat}.json?access_token=${mapboxgl.accessToken}&types=address`;
 
-    $.get(url, function (data) {
-      if (data.features.length > 0) {
-        const address = data.features[0].place_name;
-        $("#" + addressFieldId).val(address);
-
-        // Create info box with the new address
-        const infoBoxContainer =
-          document.getElementById("fixed-info-container") ||
-          document.createElement("div");
-        infoBoxContainer.id = "fixed-info-container";
-        document.body.appendChild(infoBoxContainer);
-
-        let infoContent = `
-          <div class="fixed-info-box">
-            <h3>Site Information</h3>
-            <p><strong>Address:</strong> ${address}</p>
-            <div class="info-section" id="zoning-section">
-              <h4>Zoning Controls</h4>
-              <p><em>Loading zoning data...</em></p>
-            </div>
-            
-            <div class="info-section" id="development-section">
-              <h4>Development Controls</h4>
-              <p><em>Loading development controls...</em></p>
-            </div>
-            
-            <div class="info-section" id="location-section">
-              <h4>Location</h4>
-              <p><strong>Latitude:</strong> ${coordinates.lat.toFixed(6)}</p>
-              <p><strong>Longitude:</strong> ${coordinates.lng.toFixed(6)}</p>
-            </div>
-          </div>
-        `;
-
-        infoBoxContainer.innerHTML = infoContent;
-
-        // Function to update sections as data arrives
-        const updateSection = (sectionId, content) => {
-          const section = document.querySelector(`#${sectionId}`);
-          if (section) {
-            section.innerHTML = `<h4>${
-              section.querySelector("h4").textContent
-            }</h4>${content}`;
-          }
-        };
-
-        // Development controls data structure
-        let loadedData = {
-          lots: null,
-          heritage: null,
-          admin: null,
-        };
-
-        const updateContent = () => {
-          let content = "";
-          if (loadedData.lots) {
-            content += `<p><strong>Lot ID:</strong> ${
-              loadedData.lots.pid || "N/A"
-            }</p>`;
-            if (loadedData.lots.area) {
-              content += `<p><strong>Lot Area:</strong> ${Number(
-                loadedData.lots.area
-              ).toFixed(2)} m²</p>`;
-            }
-          }
-          if (loadedData.heritage && loadedData.heritage.type) {
-            content += `<p><strong>Heritage:</strong> ${loadedData.heritage.type}</p>`;
-          }
-          if (loadedData.admin && loadedData.admin.municipality) {
-            content += `<p><strong>Municipality:</strong> ${loadedData.admin.municipality}</p>`;
-          }
-          updateSection(
-            "development-section",
-            content || "<p><em>No development controls available</em></p>"
-          );
-        };
-
-        // Fetch and update zoning data
-        fetch(zoningUrl)
-          .then((response) => response.json())
-          .then((zoningData) => {
-            let content = "";
-            if (zoningData.features && zoningData.features.length > 0) {
-              content += `<p><strong>Zone:</strong> ${
-                zoningData.features[0].attributes.ZONE || "N/A"
-              }</p>`;
-            } else {
-              content += "<p><em>No zoning data available</em></p>";
-            }
-            updateSection("zoning-section", content);
-          })
-          .catch(() => {
-            updateSection(
-              "zoning-section",
-              "<p><em>Error loading zoning data</em></p>"
-            );
-          });
-
-        // Lots
-        fetch(lotsUrl)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.features && data.features.length > 0) {
-              loadedData.lots = {
-                pid: data.features[0].attributes.PID,
-                area: data.features[0].attributes.COMP_AREA,
-              };
-            }
-            updateContent();
-          })
-          .catch(() => {
-            console.error("Error fetching lots data");
-            updateContent();
-          });
-
-        // Heritage
-        fetch(heritageUrl)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.features && data.features.length > 0) {
-              loadedData.heritage = {
-                type: data.features[0].attributes.TYPE || "Listed",
-              };
-            }
-            updateContent();
-          })
-          .catch(() => {
-            console.error("Error fetching heritage data");
-            updateContent();
-          });
-
-        // Administrative
-        fetch(adminUrl)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.features && data.features.length > 0) {
-              loadedData.admin = {
-                municipality: data.features[0].attributes.MUNICIPALITY,
-              };
-            }
-            updateContent();
-          })
-          .catch(() => {
-            console.error("Error fetching admin data");
-            updateContent();
-          });
-      }
-    });
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.features && data.features.length > 0) {
+          const address = data.features[0].place_name;
+          document.getElementById("address-box").value = address;
+        }
+      });
   }
 
-  // Simplified click handler
-  map.on("click", function (e) {
+  function setMarker(lngLat) {
     if (marker) {
-      marker.remove();
+      marker.setLngLat(lngLat);
+    } else {
+      marker = new mapboxgl.Marker({
+        color: "#0000FF",
+        draggable: true,
+      })
+        .setLngLat(lngLat)
+        .addTo(map);
+
+      marker.on("dragend", function () {
+        const lngLat = marker.getLngLat();
+        updateAddressBox(lngLat);
+      });
     }
+    updateAddressBox(lngLat);
+  }
 
-    marker = new mapboxgl.Marker({
-      color: "#FFD700",
-      circleRadius: 8,
-      draggable: false,
-    })
-      .setLngLat(e.lngLat)
-      .addTo(map);
+  geocoder.on("result", function (e) {
+    setMarker(e.result.center);
+  });
 
-    mapClickFn(e.lngLat, "address-box");
+  map.on("click", function (e) {
+    setMarker(e.lngLat);
   });
 
   var nav = new mapboxgl.NavigationControl({

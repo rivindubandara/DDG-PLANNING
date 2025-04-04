@@ -660,170 +660,55 @@ content %}
 
   map.addControl(geocoder, "top-right");
 
-  var marker;
-  function mapClickFn(coordinates, addressFieldId) {
-    const url =
-      "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-      coordinates.lng +
-      "," +
-      coordinates.lat +
-      ".json?access_token=" +
-      mapboxgl.accessToken +
-      "&types=address";
+  // Store our single marker
+  let marker = null;
 
-    // Define QLD URLs here so they're in scope
-    const zoningUrl = `https://spatial-gis.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandUse/MapServer/0/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const lotsUrl = `https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/8/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
-    const bushfireUrl = `https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Bushfire_overlay/FeatureServer/0/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+  // Function to update address box
+  function updateAddressBox(lngLat) {
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lngLat.lng},${lngLat.lat}.json?access_token=${mapboxgl.accessToken}&types=address`;
 
-    $.get(url, function (data) {
-      if (data.features.length > 0) {
-        const address = data.features[0].place_name;
-        $("#" + addressFieldId).val(address);
-
-        // Create info box with the new address
-        const infoBoxContainer =
-          document.getElementById("fixed-info-container") ||
-          document.createElement("div");
-        infoBoxContainer.id = "fixed-info-container";
-        document.body.appendChild(infoBoxContainer);
-
-        let infoContent = `
-          <div class="fixed-info-box">
-            <h3>Site Information</h3>
-            <p><strong>Address:</strong> ${address}</p>
-            <div class="info-section" id="zoning-section">
-              <h4>Zoning Controls</h4>
-              <p><em>Loading zoning data...</em></p>
-            </div>
-            
-            <div class="info-section" id="development-section">
-              <h4>Development Controls</h4>
-              <p><em>Loading development controls...</em></p>
-            </div>
-            
-            <div class="info-section" id="location-section">
-              <h4>Location</h4>
-              <p><strong>Latitude:</strong> ${coordinates.lat.toFixed(6)}</p>
-              <p><strong>Longitude:</strong> ${coordinates.lng.toFixed(6)}</p>
-            </div>
-          </div>
-        `;
-
-        infoBoxContainer.innerHTML = infoContent;
-
-        // Function to update sections as data arrives
-        const updateSection = (sectionId, content) => {
-          const section = document.querySelector(`#${sectionId}`);
-          if (section) {
-            section.innerHTML = `<h4>${
-              section.querySelector("h4").textContent
-            }</h4>${content}`;
-          }
-        };
-
-        // Development controls data structure
-        let loadedData = {
-          lots: null,
-          bushfire: null,
-        };
-
-        const updateContent = () => {
-          let content = "";
-          if (loadedData.lots) {
-            content += `<p><strong>Lot Area:</strong> ${Number(
-              loadedData.lots.area
-            ).toFixed(2)}m²</p>`;
-            content += `<p><strong>Lot ID:</strong> ${loadedData.lots.id}</p>`;
-          }
-          if (loadedData.bushfire) {
-            content += `<p><strong>Bushfire Category:</strong> ${loadedData.bushfire.category}</p>`;
-          }
-          updateSection(
-            "development-section",
-            content || "<p><em>No development controls available</em></p>"
-          );
-        };
-
-        // Fetch and update zoning data
-        fetch(zoningUrl)
-          .then((response) => response.json())
-          .then((zoningData) => {
-            let content = "";
-            if (zoningData.features && zoningData.features.length > 0) {
-              content += `<p><strong>Primary Zone:</strong> ${zoningData.features[0].attributes.primary_}</p>`;
-              content += `<p><strong>Secondary Zone:</strong> ${zoningData.features[0].attributes.secondary}</p>`;
-            } else {
-              content += "<p><em>No zoning data available</em></p>";
-            }
-            updateSection("zoning-section", content);
-          })
-          .catch(() =>
-            updateSection(
-              "zoning-section",
-              "<p><em>Error loading zoning data</em></p>"
-            )
-          );
-
-        // Lots
-        fetch(lotsUrl)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.features && data.features.length > 0) {
-              loadedData.lots = {
-                area: data.features[0].attributes.lot_area,
-                id: data.features[0].attributes.lotplan,
-              };
-            }
-            updateContent();
-          })
-          .catch(() => {
-            console.error("Error fetching lots data");
-            updateContent();
-          });
-
-        // Bushfire
-        fetch(bushfireUrl)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.features && data.features.length > 0) {
-              loadedData.bushfire = {
-                category: data.features[0].attributes.OVL2_CAT,
-              };
-            }
-            updateContent();
-          })
-          .catch(() => {
-            console.error("Error fetching bushfire data");
-            updateContent();
-          });
-      }
-    });
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.features && data.features.length > 0) {
+          const address = data.features[0].place_name;
+          document.getElementById("address-box").value = address;
+        }
+      });
   }
 
-  // Simplified click handler
-  map.on("click", function (e) {
+  // Function to create or move marker
+  function setMarker(lngLat) {
     if (marker) {
-      marker.remove();
+      // Move existing marker
+      marker.setLngLat(lngLat);
+    } else {
+      // Create new marker
+      marker = new mapboxgl.Marker({
+        color: "#0000FF", // Blue color
+        draggable: true,
+      })
+        .setLngLat(lngLat)
+        .addTo(map);
+
+      // Add dragend event listener
+      marker.on("dragend", function () {
+        const lngLat = marker.getLngLat();
+        updateAddressBox(lngLat);
+      });
     }
+    // Update address box
+    updateAddressBox(lngLat);
+  }
 
-    marker = new mapboxgl.Marker({
-      color: "#FFD700",
-      circleRadius: 8,
-      draggable: false,
-    })
-      .setLngLat(e.lngLat)
-      .addTo(map);
-
-    mapClickFn(e.lngLat, "address-box");
+  geocoder.on("result", function (e) {
+    setMarker(e.result.center);
   });
 
-  var nav = new mapboxgl.NavigationControl({
-    showCompass: true,
-    showZoom: true,
+  // Click handler to place/move marker
+  map.on("click", function (e) {
+    setMarker(e.lngLat);
   });
-
-  map.addControl(nav, "top-right");
 
   // Add event listeners for all sliders
   document.querySelectorAll(".opacity-slider").forEach((slider) => {
