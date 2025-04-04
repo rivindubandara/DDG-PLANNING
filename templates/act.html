@@ -1,547 +1,649 @@
 {% extends 'base.html' %} {% block title %} planning {% endblock %} {% block
-content %}
-
-<div class="container">
-  <div class="logo-container">
-    <a href="{{ url_for('index') }}">
-      <img
-        src="{{ url_for('static', filename='images/dd_logo.png') }}"
-        alt="Digital Design Logo"
-      />
-    </a>
-    <a href="https://www.nettletontribe.com.au/" target="_blank">
-      <img
-        src="{{ url_for('static', filename='images/nt_logo.png') }}"
-        alt="Nettleton Tribe Logo"
-      />
-    </a>
-  </div>
-
-  <div class="marker-info-box" id="marker-info-box"></div>
-  <div class="sidebar active">
-    <div style="flex: 1"></div>
-    <div class="menu">
-      <p class="title">MODEL</p>
-      <ul>
-        <li>
-          <a href="#" onclick="triggerACTPlanning()">
-            <i class="icon ph ph-building"></i>
-            <span class="text">GENERATE</span>
-          </a>
-        </li>
-        <p class="title">CONTROLS</p>
-        <li>
-          <a href="#">
-            <i class="icon ph ph-toggle-right"></i>
-            <span class="text">CONTROLS</span>
-            <i class="arrow ph-bold ph-caret-down"></i>
-          </a>
-          <ul class="sub-menu">
-            <li data-layer-id="admin-raster-layer">
-              <a href="#">
-                <span class="text">SUBURBS</span>
-              </a>
-              <input
-                type="range"
-                class="opacity-slider"
-                min="0"
-                max="1"
-                step="0.1"
-                value="0"
-                data-layer-id="admin-raster-layer"
-              />
-            </li>
-            <li data-layer-id="cadastre-raster-layer">
-              <a href="#">
-                <span class="text">CADASTRE</span>
-              </a>
-              <input
-                type="range"
-                class="opacity-slider"
-                min="0"
-                max="1"
-                step="0.1"
-                value="0"
-                data-layer-id="cadastre-raster-layer"
-              />
-            </li>
-            <li data-layer-id="building-layer">
-              <a href="#">
-                <span class="text">3D BUILDINGS</span>
-              </a>
-              <input
-                type="range"
-                class="opacity-slider"
-                min="0"
-                max="1"
-                step="1"
-                value="0"
-                data-layer-id="building-layer"
-              />
-            </li>
-            <!-- <li data-layer-id="capital-land-zoning-raster-layer">
-              <a href="#">
-                <span class="text">CAPITAL ZONING</span>
-              </a>
-            </li> -->
-            <li data-layer-id="land-zoning-raster-layer">
-              <a href="#">
-                <span class="text">TERRITORIAL ZONING</span>
-              </a>
-              <input
-                type="range"
-                class="opacity-slider"
-                min="0"
-                max="1"
-                step="0.1"
-                value="0"
-                data-layer-id="land-zoning-raster-layer"
-              />
-            </li>
-            <li data-layer-id="Territories" data-layer-id="Territories-labels">
-              <a href="#">
-                <span class="text">NATIVE LAND</span>
-              </a>
-              <input
-                type="range"
-                class="opacity-slider"
-                min="0"
-                max="1"
-                step="0.1"
-                value="0"
-                data-layer-id="Territories"
-              />
-            </li>
-            <li data-layer-id="mapbox-satellite-layer">
-              <a href="#">
-                <span class="text">SATELLITE</span>
-              </a>
-              <input
-                type="range"
-                class="opacity-slider"
-                min="0"
-                max="1"
-                step="0.1"
-                value="0"
-                data-layer-id="mapbox-satellite-layer"
-              />
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-    <div class="menu">
-      <p class="title">GIRAFFE</p>
-      <ul>
-        <li id="giraffe">
-          <a href="#">
-            <i class="icon ph ph-horse"></i>
-            <span class="text">GIRAFFE</span>
-          </a>
-        </li>
-        <input
-          type="file"
-          id="giraffeInput"
-          name="giraffeInput"
-          style="display: none"
+  content %}
+  
+  <div class="container">
+    <div class="logo-container">
+      <a href="{{ url_for('index') }}">
+        <img
+          src="{{ url_for('static', filename='images/dd_logo.png') }}"
+          alt="Digital Design Logo"
         />
-      </ul>
+      </a>
+      <a href="https://www.nettletontribe.com.au/" target="_blank">
+        <img
+          src="{{ url_for('static', filename='images/nt_logo.png') }}"
+          alt="Nettleton Tribe Logo"
+        />
+      </a>
     </div>
-    <div class="menu">
-      <p class="title">Support</p>
-      <ul>
-        <li>
-          <a href="#" id="help-icon">
-            <i class="icon ph ph-info"></i>
-            <span class="text">HELP</span>
-          </a>
-        </li>
-      </ul>
+  
+    <div class="marker-info-box" id="marker-info-box"></div>
+    <div class="sidebar active">
+      <div style="flex: 1"></div>
+      <div class="menu">
+        <p class="title">MODEL</p>
+        <ul>
+          <li>
+            <a href="#" onclick="triggerACTPlanning()">
+              <i class="icon ph ph-building"></i>
+              <span class="text">GENERATE</span>
+            </a>
+          </li>
+          <p class="title">CONTROLS</p>
+          <li>
+            <a href="#">
+              <i class="icon ph ph-toggle-right"></i>
+              <span class="text">CONTROLS</span>
+              <i class="arrow ph-bold ph-caret-down"></i>
+            </a>
+            <ul class="sub-menu">
+              <li data-layer-id="admin-raster-layer">
+                <a href="#">
+                  <span class="text">SUBURBS</span>
+                </a>
+                <input
+                  type="range"
+                  class="opacity-slider"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0"
+                  data-layer-id="admin-raster-layer"
+                />
+              </li>
+              <li data-layer-id="cadastre-raster-layer">
+                <a href="#">
+                  <span class="text">CADASTRE</span>
+                </a>
+                <input
+                  type="range"
+                  class="opacity-slider"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0"
+                  data-layer-id="cadastre-raster-layer"
+                />
+              </li>
+              <li data-layer-id="building-layer">
+                <a href="#">
+                  <span class="text">3D BUILDINGS</span>
+                </a>
+                <input
+                  type="range"
+                  class="opacity-slider"
+                  min="0"
+                  max="1"
+                  step="1"
+                  value="0"
+                  data-layer-id="building-layer"
+                />
+              </li>
+              <!-- <li data-layer-id="capital-land-zoning-raster-layer">
+                <a href="#">
+                  <span class="text">CAPITAL ZONING</span>
+                </a>
+              </li> -->
+              <li data-layer-id="land-zoning-raster-layer">
+                <a href="#">
+                  <span class="text">TERRITORIAL ZONING</span>
+                </a>
+                <input
+                  type="range"
+                  class="opacity-slider"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0"
+                  data-layer-id="land-zoning-raster-layer"
+                />
+              </li>
+              <li data-layer-id="Territories" data-layer-id="Territories-labels">
+                <a href="#">
+                  <span class="text">NATIVE LAND</span>
+                </a>
+                <input
+                  type="range"
+                  class="opacity-slider"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0"
+                  data-layer-id="Territories"
+                />
+              </li>
+              <li data-layer-id="mapbox-satellite-layer">
+                <a href="#">
+                  <span class="text">SATELLITE</span>
+                </a>
+                <input
+                  type="range"
+                  class="opacity-slider"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0"
+                  data-layer-id="mapbox-satellite-layer"
+                />
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="menu">
+        <p class="title">GIRAFFE</p>
+        <ul>
+          <li id="giraffe">
+            <a href="#">
+              <i class="icon ph ph-horse"></i>
+              <span class="text">GIRAFFE</span>
+            </a>
+          </li>
+          <input
+            type="file"
+            id="giraffeInput"
+            name="giraffeInput"
+            style="display: none"
+          />
+        </ul>
+      </div>
+      <div class="menu">
+        <p class="title">Support</p>
+        <ul>
+          <li>
+            <a href="#" id="help-icon">
+              <i class="icon ph ph-info"></i>
+              <span class="text">HELP</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div style="flex: 1"></div>
     </div>
-    <div style="flex: 1"></div>
   </div>
-</div>
-
-<script>
-  mapboxgl.accessToken =
-    "pk.eyJ1Ijoicml2aW5kdWIiLCJhIjoiY2xmYThkcXNjMHRkdDQzcGU4Mmh2a3Q3MSJ9.dXlhamKyYyGusL3PWqDD9Q";
-  var lat = "{{ lat }}";
-  var lon = "{{ lon }}";
-
-  const map = new mapboxgl.Map({
-    container: "map",
-    center: [lon, lat],
-    zoom: 10,
-    config: {
-      basemap: {
-        show3dObjects: false,
-      },
-    },
-  });
-
-  document
-    .querySelector('li[data-layer-id="building-layer"] a')
-    .addEventListener("click", function (e) {
-      e.preventDefault();
-      const menuItem = this.parentElement;
-      const currentState = map.getConfigProperty("basemap", "show3dObjects");
-      const newState = !currentState;
-
-      map.setConfigProperty("basemap", "show3dObjects", newState);
-
-      if (newState) {
-        menuItem.classList.add("active");
-      } else {
-        menuItem.classList.remove("active");
-      }
-    });
-
-  map.on("style.load", () => {
-    map.setConfigProperty("basemap", "lightPreset", "night");
-    map.setConfigProperty("basemap", "showPointOfInterestLabels", false);
-    map.setConfigProperty("basemap", "showPlaceLabels", false);
-    map.setConfigProperty("basemap", "showTransitLabels", false);
-  });
-
-  var layerMapping = {
-    "capital-land-zoning-raster-layer": "capital-land-zoning-labels",
-    "land-zoning-raster-layer": "land-zoning-raster-layer-labels",
-    Territories: "Territories-labels",
-  };
-
-  map.on("load", function () {
-    map.addSource("cadastre-raster-tiles", {
-      type: "raster",
-      tiles: [
-        "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A55&bbox={bbox-epsg-3857}",
-      ],
-      tileSize: 256,
-    });
-
-    map.addLayer({
-      id: "cadastre-raster-layer",
-      slot: "middle",
-      type: "raster",
-      source: "cadastre-raster-tiles",
-      minzoom: 0,
-      maxzoom: 22,
-      layout: {
-        visibility: "none",
-      },
-      paint: {
-        "raster-emissive-strength": 1.0,
+  
+  <script>
+    mapboxgl.accessToken =
+      "pk.eyJ1Ijoicml2aW5kdWIiLCJhIjoiY2xmYThkcXNjMHRkdDQzcGU4Mmh2a3Q3MSJ9.dXlhamKyYyGusL3PWqDD9Q";
+    var lat = "{{ lat }}";
+    var lon = "{{ lon }}";
+  
+    const map = new mapboxgl.Map({
+      container: "map",
+      center: [lon, lat],
+      zoom: 10,
+      config: {
+        basemap: {
+          show3dObjects: false,
+        },
       },
     });
-
-    map.addSource("mapbox-satellite", {
-      type: "raster",
-      url: "mapbox://mapbox.satellite",
-      tileSize: 256,
-    });
-
-    map.addLayer({
-      id: "mapbox-satellite-layer",
-      type: "raster",
-      slot: "middle",
-      source: "mapbox-satellite",
-      layout: {
-        visibility: "none",
-      },
-      paint: {
-        "raster-emissive-strength": 1.0,
-      },
-    });
-
-    map.addSource("land-zoning-raster-tiles", {
-      type: "raster",
-      tiles: [
-        "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/tp_luz_layers/MapServer//export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A&bbox={bbox-epsg-3857}",
-      ],
-      tileSize: 256,
-    });
-
-    map.addLayer({
-      id: "land-zoning-raster-layer",
-      type: "raster",
-      slot: "middle",
-      source: "land-zoning-raster-tiles",
-      minzoom: 0,
-      maxzoom: 22,
-      layout: {
-        visibility: "none",
-      },
-      paint: {
-        "raster-emissive-strength": 1.0,
-      },
-    });
-
-    map.addSource("land-zoning-raster-tiles-labels", {
-      type: "raster",
-      tiles: [
-        "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/tp_labels/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A&bbox={bbox-epsg-3857}",
-      ],
-      tileSize: 256,
-    });
-
-    map.addLayer({
-      id: "land-zoning-raster-layer-labels",
-      type: "raster",
-      slot: "middle",
-      source: "land-zoning-raster-tiles-labels",
-      minzoom: 0,
-      maxzoom: 22,
-      layout: {
-        visibility: "none",
-      },
-      paint: {
-        "raster-emissive-strength": 1.0,
-      },
-    });
-
-    map.addSource("capital-land-zoning-raster-tiles", {
-      type: "raster",
-      tiles: [
-        "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/national_capital_plan_current/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A0&bbox={bbox-epsg-3857}",
-      ],
-      tileSize: 256,
-    });
-
-    map.addLayer({
-      id: "capital-land-zoning-raster-layer",
-      type: "raster",
-      source: "capital-land-zoning-raster-tiles",
-      minzoom: 0,
-      maxzoom: 22,
-      layout: {
-        visibility: "none",
-      },
-      paint: {
-        "raster-emissive-strength": 1.0,
-      },
-    });
-
-    map.addSource("capital-land-zoning-vector", {
-      type: "geojson",
-      data: "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/national_capital_plan_current/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=geojson",
-    });
-
-    map.addLayer({
-      id: "capital-land-zoning-labels",
-      type: "symbol",
-      source: "capital-land-zoning-vector",
-      layout: {
-        "text-field": ["get", "POLICY"],
-        "text-size": 12,
-        visibility: "none",
-      },
-      paint: {
-        "text-color": "#ffffff",
-      },
-    });
-
-    map.addSource("admin-raster-tiles", {
-      type: "raster",
-      tiles: [
-        "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer//export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A29&bbox={bbox-epsg-3857}",
-      ],
-      tileSize: 256,
-    });
-
-    map.addLayer({
-      id: "admin-raster-layer",
-      type: "raster",
-      slot: "middle",
-      source: "admin-raster-tiles",
-      minzoom: 0,
-      maxzoom: 22,
-      layout: {
-        visibility: "none",
-      },
-      paint: {
-        "raster-emissive-strength": 1.0,
-      },
-    });
-
-    map.addSource("nativelands-source", {
-      type: "vector",
-      url: "mapbox://nativeland.cjh3mywgg04aaahpidhgio50e-9ctzy",
-    });
-
-    map.addLayer({
-      id: "Territories",
-      type: "fill",
-      slot: "middle",
-      source: "nativelands-source",
-      "source-layer": "Territories",
-      paint: {
-        "fill-color": ["get", "color"],
-        "fill-opacity": 1,
-        "fill-emissive-strength": 1,
-      },
-      minzoom: 0,
-      maxzoom: 22,
-      layout: {
-        visibility: "none",
-      },
-    });
-
-    map.addLayer({
-      id: "Territories-labels",
-      type: "symbol",
-      source: "nativelands-source",
-      "source-layer": "Territories",
-      layout: {
-        "text-field": ["to-string", ["get", "Name"]],
-        "text-font": ["Open Sans ExtraBold", "Arial Unicode MS Regular"],
-        "text-size": 15,
-        visibility: "none",
-      },
-      paint: {
-        "text-color": "#ffffff",
-        "text-emissive-strength": 1,
-      },
-      minzoom: 0,
-      maxzoom: 22,
-    });
-  });
-
-  const geocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    mapboxgl: mapboxgl,
-    marker: false,
-  });
-
-  map.addControl(geocoder, "top-right");
-
-  let marker = null;
-
-  function updateAddressBox(lngLat) {
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lngLat.lng},${lngLat.lat}.json?access_token=${mapboxgl.accessToken}&types=address`;
-
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.features && data.features.length > 0) {
-          const address = data.features[0].place_name;
-          document.getElementById("address-box").value = address;
-        }
-      });
-  }
-
-  function setMarker(lngLat) {
-    if (marker) {
-      marker.setLngLat(lngLat);
-    } else {
-      marker = new mapboxgl.Marker({
-        color: "#0000FF",
-        draggable: true,
-      })
-        .setLngLat(lngLat)
-        .addTo(map);
-
-      marker.on("dragend", function () {
-        const lngLat = marker.getLngLat();
-        updateAddressBox(lngLat);
-      });
-    }
-    updateAddressBox(lngLat);
-  }
-
-  geocoder.on("result", function (e) {
-    setMarker(e.result.center);
-  });
-
-  map.on("click", function (e) {
-    setMarker(e.lngLat);
-  });
-
-  var nav = new mapboxgl.NavigationControl({
-    showCompass: true,
-    showZoom: true,
-  });
-
-  map.addControl(nav, "top-right");
-</script>
-
-<script>
-  function triggerACTPlanning() {
-    var address = document.getElementById("address-box").value;
-    hideErrorMessage();
-
-    if (!address.trim()) {
-      showErrorMessage("Please drop a marker on a site before proceeding.");
-      return;
-    }
-
-    displaySpinner();
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        if (xhr.status === 200) {
-          var blob = new Blob([xhr.response], {
-            type: "application/octet-stream",
-          });
-          var url = window.URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.href = url;
-          a.download = "act_planning.3dm";
-          a.click();
-          hideSpinner();
+  
+    document
+      .querySelector('li[data-layer-id="building-layer"] a')
+      .addEventListener("click", function (e) {
+        e.preventDefault();
+        const menuItem = this.parentElement;
+        const currentState = map.getConfigProperty("basemap", "show3dObjects");
+        const newState = !currentState;
+  
+        map.setConfigProperty("basemap", "show3dObjects", newState);
+  
+        if (newState) {
+          menuItem.classList.add("active");
         } else {
-          console.error("Error:", xhr.status, xhr.statusText);
-          showErrorMessage("Error: " + xhr.statusText);
-          hideSpinner();
+          menuItem.classList.remove("active");
         }
-      }
+      });
+  
+    map.on("style.load", () => {
+      map.setConfigProperty("basemap", "lightPreset", "night");
+      map.setConfigProperty("basemap", "showPointOfInterestLabels", false);
+      map.setConfigProperty("basemap", "showPlaceLabels", false);
+      map.setConfigProperty("basemap", "showTransitLabels", false);
+    });
+  
+    var layerMapping = {
+      "capital-land-zoning-raster-layer": "capital-land-zoning-labels",
+      "land-zoning-raster-layer": "land-zoning-raster-layer-labels",
+      Territories: "Territories-labels",
     };
-    xhr.open(
-      "GET",
-      "{{ url_for('act_planning') }}?address=" + encodeURIComponent(address),
-      true
-    );
-    xhr.responseType = "blob";
-    xhr.send();
-  }
-</script>
-
-<script>
-  document.querySelectorAll(".opacity-slider").forEach((slider) => {
-    slider.addEventListener("mousedown", (e) => e.stopPropagation());
-    slider.addEventListener("click", (e) => e.stopPropagation());
-
-    slider.addEventListener("input", (e) => {
-      const layerId = e.target.dataset.layerId;
-      const opacity = parseFloat(e.target.value);
-
-      if (layerId === "mapbox-satellite-layer") {
-        if (map.getLayer(layerId)) {
+  
+    map.on("load", function () {
+      map.addSource("cadastre-raster-tiles", {
+        type: "raster",
+        tiles: [
+          "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A55&bbox={bbox-epsg-3857}",
+        ],
+        tileSize: 256,
+      });
+  
+      map.addLayer({
+        id: "cadastre-raster-layer",
+        slot: "middle",
+        type: "raster",
+        source: "cadastre-raster-tiles",
+        minzoom: 0,
+        maxzoom: 22,
+        layout: {
+          visibility: "none",
+        },
+        paint: {
+          "raster-emissive-strength": 1.0,
+        },
+      });
+  
+      map.addSource("mapbox-satellite", {
+        type: "raster",
+        url: "mapbox://mapbox.satellite",
+        tileSize: 256,
+      });
+  
+      map.addLayer({
+        id: "mapbox-satellite-layer",
+        type: "raster",
+        slot: "middle",
+        source: "mapbox-satellite",
+        layout: {
+          visibility: "none",
+        },
+        paint: {
+          "raster-emissive-strength": 1.0,
+        },
+      });
+  
+      map.addSource("land-zoning-raster-tiles", {
+        type: "raster",
+        tiles: [
+          "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/tp_luz_layers/MapServer//export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A&bbox={bbox-epsg-3857}",
+        ],
+        tileSize: 256,
+      });
+  
+      map.addLayer({
+        id: "land-zoning-raster-layer",
+        type: "raster",
+        slot: "middle",
+        source: "land-zoning-raster-tiles",
+        minzoom: 0,
+        maxzoom: 22,
+        layout: {
+          visibility: "none",
+        },
+        paint: {
+          "raster-emissive-strength": 1.0,
+        },
+      });
+  
+      map.addSource("land-zoning-raster-tiles-labels", {
+        type: "raster",
+        tiles: [
+          "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/tp_labels/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A&bbox={bbox-epsg-3857}",
+        ],
+        tileSize: 256,
+      });
+  
+      map.addLayer({
+        id: "land-zoning-raster-layer-labels",
+        type: "raster",
+        slot: "middle",
+        source: "land-zoning-raster-tiles-labels",
+        minzoom: 0,
+        maxzoom: 22,
+        layout: {
+          visibility: "none",
+        },
+        paint: {
+          "raster-emissive-strength": 1.0,
+        },
+      });
+  
+      map.addSource("capital-land-zoning-raster-tiles", {
+        type: "raster",
+        tiles: [
+          "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/national_capital_plan_current/MapServer/export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A0&bbox={bbox-epsg-3857}",
+        ],
+        tileSize: 256,
+      });
+  
+      map.addLayer({
+        id: "capital-land-zoning-raster-layer",
+        type: "raster",
+        source: "capital-land-zoning-raster-tiles",
+        minzoom: 0,
+        maxzoom: 22,
+        layout: {
+          visibility: "none",
+        },
+        paint: {
+          "raster-emissive-strength": 1.0,
+        },
+      });
+  
+      map.addSource("capital-land-zoning-vector", {
+        type: "geojson",
+        data: "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/national_capital_plan_current/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=geojson",
+      });
+  
+      map.addLayer({
+        id: "capital-land-zoning-labels",
+        type: "symbol",
+        source: "capital-land-zoning-vector",
+        layout: {
+          "text-field": ["get", "POLICY"],
+          "text-size": 12,
+          visibility: "none",
+        },
+        paint: {
+          "text-color": "#ffffff",
+        },
+      });
+  
+      map.addSource("admin-raster-tiles", {
+        type: "raster",
+        tiles: [
+          "https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer//export?f=image&dpi=96&transparent=true&format=png32&bboxSR=3857&imageSR=3857&size=256%2C256&layers=show%3A29&bbox={bbox-epsg-3857}",
+        ],
+        tileSize: 256,
+      });
+  
+      map.addLayer({
+        id: "admin-raster-layer",
+        type: "raster",
+        slot: "middle",
+        source: "admin-raster-tiles",
+        minzoom: 0,
+        maxzoom: 22,
+        layout: {
+          visibility: "none",
+        },
+        paint: {
+          "raster-emissive-strength": 1.0,
+        },
+      });
+  
+      map.addSource("nativelands-source", {
+        type: "vector",
+        url: "mapbox://nativeland.cjh3mywgg04aaahpidhgio50e-9ctzy",
+      });
+  
+      map.addLayer({
+        id: "Territories",
+        type: "fill",
+        slot: "middle",
+        source: "nativelands-source",
+        "source-layer": "Territories",
+        paint: {
+          "fill-color": ["get", "color"],
+          "fill-opacity": 1,
+          "fill-emissive-strength": 1,
+        },
+        minzoom: 0,
+        maxzoom: 22,
+        layout: {
+          visibility: "none",
+        },
+      });
+  
+      map.addLayer({
+        id: "Territories-labels",
+        type: "symbol",
+        source: "nativelands-source",
+        "source-layer": "Territories",
+        layout: {
+          "text-field": ["to-string", ["get", "Name"]],
+          "text-font": ["Open Sans ExtraBold", "Arial Unicode MS Regular"],
+          "text-size": 15,
+          visibility: "none",
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-emissive-strength": 1,
+        },
+        minzoom: 0,
+        maxzoom: 22,
+      });
+    });
+  
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+      marker: false,
+    });
+  
+    map.addControl(geocoder, "top-right");
+  
+    var marker;
+    function mapClickFn(coordinates, addressFieldId) {
+      const url =
+        "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
+        coordinates.lng +
+        "," +
+        coordinates.lat +
+        ".json?access_token=" +
+        mapboxgl.accessToken +
+        "&types=address";
+  
+      // Define ACT URLs here so they're in scope
+      const lotsUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_BASE_MAP/basic/MapServer/66/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+      const heritageUrl = `https://data4.actmapi.act.gov.au/arcgis/rest/services/ACT_PLANNING/heritage/MapServer/3/query?geometry=${coordinates.lng},${coordinates.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&f=json`;
+  
+      $.get(url, function (data) {
+        if (data.features.length > 0) {
+          const address = data.features[0].place_name;
+          $("#" + addressFieldId).val(address);
+  
+          // Create info box with the new address
+          const infoBoxContainer =
+            document.getElementById("fixed-info-container") ||
+            document.createElement("div");
+          infoBoxContainer.id = "fixed-info-container";
+          document.body.appendChild(infoBoxContainer);
+  
+          let infoContent = `
+            <div class="fixed-info-box">
+              <h3>Site Information</h3>
+              <p><strong>Address:</strong> ${address}</p>
+              <div class="info-section" id="development-section">
+                <h4>Development Controls</h4>
+                <p><em>Loading development controls...</em></p>
+              </div>
+              
+              <div class="info-section" id="location-section">
+                <h4>Location</h4>
+                <p><strong>Latitude:</strong> ${coordinates.lat.toFixed(6)}</p>
+                <p><strong>Longitude:</strong> ${coordinates.lng.toFixed(6)}</p>
+              </div>
+            </div>
+          `;
+  
+          infoBoxContainer.innerHTML = infoContent;
+  
+          // Function to update sections as data arrives
+          const updateSection = (sectionId, content) => {
+            const section = document.querySelector(`#${sectionId}`);
+            if (section) {
+              section.innerHTML = `<h4>${
+                section.querySelector("h4").textContent
+              }</h4>${content}`;
+            }
+          };
+  
+          // Development controls data structure
+          let loadedData = {
+            lots: null,
+            heritage: null,
+          };
+  
+          const updateContent = () => {
+            let content = "";
+            if (loadedData.lots) {
+              if (loadedData.lots.block) {
+                content += `<p><strong>Block:</strong> ${loadedData.lots.block}</p>`;
+              }
+              if (loadedData.lots.section) {
+                content += `<p><strong>Section:</strong> ${loadedData.lots.section}</p>`;
+              }
+              if (loadedData.lots.area) {
+                content += `<p><strong>Lot Area:</strong> ${Number(
+                  loadedData.lots.area
+                ).toFixed(2)}m²</p>`;
+              }
+            }
+            if (loadedData.heritage && loadedData.heritage.place) {
+              content += `<p><strong>Heritage:</strong> ${loadedData.heritage.place}</p>`;
+            }
+            updateSection(
+              "development-section",
+              content || "<p><em>No development controls available</em></p>"
+            );
+          };
+  
+          // Lots
+          fetch(lotsUrl)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.features && data.features.length > 0) {
+                loadedData.lots = {
+                  block: data.features[0].attributes.BLOCK_NUMBER || "N/A",
+                  section: data.features[0].attributes.SECTION_NUMBER || "N/A",
+                  area: data.features[0].attributes.SHAPE_Area,
+                };
+              }
+              updateContent();
+            })
+            .catch(() => {
+              console.error("Error fetching lots data");
+              updateContent();
+            });
+  
+          // Heritage
+          fetch(heritageUrl)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.features && data.features.length > 0) {
+                loadedData.heritage = {
+                  place: data.features[0].attributes.NAME || "Yes",
+                };
+              }
+              updateContent();
+            })
+            .catch(() => {
+              console.error("Error fetching heritage data");
+              updateContent();
+            });
+        }
+      });
+    }
+  
+    // Simplified click handler
+    map.on("click", function (e) {
+      if (marker) {
+        marker.remove();
+      }
+  
+      marker = new mapboxgl.Marker({
+        color: "#FFD700",
+        circleRadius: 8,
+        draggable: false,
+      })
+        .setLngLat(e.lngLat)
+        .addTo(map);
+  
+      mapClickFn(e.lngLat, "address-box");
+    });
+  
+    var nav = new mapboxgl.NavigationControl({
+      showCompass: true,
+      showZoom: true,
+    });
+  
+    map.addControl(nav, "top-right");
+  </script>
+  
+  <script>
+    function triggerACTPlanning() {
+      var address = document.getElementById("address-box").value;
+      hideErrorMessage();
+  
+      if (!address.trim()) {
+        showErrorMessage("Please drop a marker on a site before proceeding.");
+        return;
+      }
+  
+      displaySpinner();
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            var blob = new Blob([xhr.response], {
+              type: "application/octet-stream",
+            });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "act_planning.3dm";
+            a.click();
+            hideSpinner();
+          } else {
+            console.error("Error:", xhr.status, xhr.statusText);
+            showErrorMessage("Error: " + xhr.statusText);
+            hideSpinner();
+          }
+        }
+      };
+      xhr.open(
+        "GET",
+        "{{ url_for('act_planning') }}?address=" + encodeURIComponent(address),
+        true
+      );
+      xhr.responseType = "blob";
+      xhr.send();
+    }
+  </script>
+  
+  <script>
+    document.querySelectorAll(".opacity-slider").forEach((slider) => {
+      slider.addEventListener("mousedown", (e) => e.stopPropagation());
+      slider.addEventListener("click", (e) => e.stopPropagation());
+  
+      slider.addEventListener("input", (e) => {
+        const layerId = e.target.dataset.layerId;
+        const opacity = parseFloat(e.target.value);
+  
+        if (layerId === "mapbox-satellite-layer") {
+          // Special handling for satellite layer
+          if (map.getLayer(layerId)) {
+            map.setLayoutProperty(
+              layerId,
+              "visibility",
+              opacity > 0 ? "visible" : "none"
+            );
+            map.setPaintProperty(layerId, "raster-opacity", opacity);
+          }
+        } else if (layerId === "building-layer") {
+          // Special handling for 3D buildings
+          map.setConfigProperty("basemap", "show3dObjects", opacity > 0);
+        } else if (map.getLayer(layerId)) {
+          // For other raster layers
           map.setLayoutProperty(
             layerId,
             "visibility",
             opacity > 0 ? "visible" : "none"
           );
           map.setPaintProperty(layerId, "raster-opacity", opacity);
+  
+          // Handle special cases for layers with labels
+          if (layerMapping[layerId]) {
+            map.setLayoutProperty(
+              layerMapping[layerId],
+              "visibility",
+              opacity > 0 ? "visible" : "none"
+            );
+          }
         }
-      } else if (layerId === "building-layer") {
-        map.setConfigProperty("basemap", "show3dObjects", opacity > 0);
-      } else if (map.getLayer(layerId)) {
-        map.setLayoutProperty(
-          layerId,
-          "visibility",
-          opacity > 0 ? "visible" : "none"
-        );
-        map.setPaintProperty(layerId, "raster-opacity", opacity);
-
-        if (layerMapping[layerId]) {
-          map.setLayoutProperty(
-            layerMapping[layerId],
-            "visibility",
-            opacity > 0 ? "visible" : "none"
-          );
-        }
-      }
+      });
     });
-  });
-</script>
-
-{% endblock %}
+  </script>
+  
+  {% endblock %}
